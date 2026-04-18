@@ -22,8 +22,8 @@ export default function ProformaDetailPage() {
     fetch(`/api/proforma/${id}`).then(r => r.json()).then(data => { setPi(data); setLoading(false) })
   }, [id])
 
-  if (loading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
-  if (!pi) return <div className="flex-1 flex items-center justify-center text-gray-400">Proforma not found</div>
+  if (loading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-slate-400" /></div>
+  if (!pi) return <div className="flex-1 flex items-center justify-center text-slate-400">Proforma not found</div>
 
   if (editing) {
     return (
@@ -36,6 +36,7 @@ export default function ProformaDetailPage() {
   }
 
   const items = pi.proforma_items ?? []
+  const refRfqNumber = (pi.rfqs as { rfq_number?: string } | undefined)?.rfq_number
 
   return (
     <PageWrapper
@@ -54,94 +55,134 @@ export default function ProformaDetailPage() {
     >
       <div className="card card-body w-full print-page">
         <DocumentHeader
-          title="PROFORMA INVOICE"
+          title="Proforma Invoice"
+          subtitle="Trade &amp; Export Documentation"
           docNumber={pi.proforma_number}
           docDate={formatDate(pi.invoice_date)}
           extra={
-            <div className="text-sm text-gray-600 mt-1 space-y-0.5">
-              {pi.valid_until_date && <p><span className="font-medium">Valid Until:</span> {formatDate(pi.valid_until_date)}</p>}
-              {(pi.rfqs as { rfq_number?: string } | undefined)?.rfq_number && (
-                <p><span className="font-medium">Ref RFQ:</span> {(pi.rfqs as { rfq_number?: string }).rfq_number}</p>
+            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+              {pi.valid_until_date && (
+                <>
+                  <span className="font-bold text-slate-500 uppercase tracking-wider">Valid Until</span>
+                  <span className="text-slate-800 font-medium">{formatDate(pi.valid_until_date)}</span>
+                </>
+              )}
+              {refRfqNumber && (
+                <>
+                  <span className="font-bold text-slate-500 uppercase tracking-wider">Ref RFQ</span>
+                  <span className="font-mono font-semibold text-slate-800">{refRfqNumber}</span>
+                </>
+              )}
+              {pi.currency && (
+                <>
+                  <span className="font-bold text-slate-500 uppercase tracking-wider">Currency</span>
+                  <span className="font-semibold text-slate-800">{pi.currency}</span>
+                </>
               )}
             </div>
           }
         />
 
-        <div className="mb-5 no-print"><StatusBadge status={pi.status} /></div>
+        {/* Status badge — screen only */}
+        <div className="mb-6 no-print"><StatusBadge status={pi.status} /></div>
 
-        {/* Sent To / Shipping */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
-          <div>
-            <p className="section-title">Sent To</p>
-            <p className="font-medium">{pi.client_company}</p>
-            {pi.client_department && <p>{pi.client_department}</p>}
-            {pi.client_address && <p className="whitespace-pre-line">{pi.client_address}</p>}
-            {pi.client_country && <p>{pi.client_country}</p>}
-            {pi.client_phone && <p><span className="font-medium">Phone:</span> {pi.client_phone}</p>}
+        {/* Bill-to / Shipping — structural print boxes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 text-sm">
+          <div className="print-box">
+            <p className="print-box-title">Bill To</p>
+            <p className="font-bold text-slate-900">{pi.client_company}</p>
+            {pi.client_department && <p className="text-slate-700">{pi.client_department}</p>}
+            {pi.client_address && <p className="whitespace-pre-line text-slate-700">{pi.client_address}</p>}
+            {pi.client_country && <p className="text-slate-700">{pi.client_country}</p>}
+            {pi.client_phone && (
+              <p className="text-slate-700 mt-1"><span className="font-semibold">Phone:</span> {pi.client_phone}</p>
+            )}
           </div>
-          <div>
-            <p className="section-title">Shipping & Terms</p>
-            {pi.airway_bill && <p><span className="font-medium">Airway Bill:</span> {pi.airway_bill}</p>}
-            {pi.incoterm && <p><span className="font-medium">Incoterm:</span> {pi.incoterm}</p>}
-            {pi.incoterm_country && <p><span className="font-medium">Incoterm Country:</span> {pi.incoterm_country}</p>}
-            <p><span className="font-medium">Currency:</span> {pi.currency}</p>
+
+          <div className="print-box">
+            <p className="print-box-title">Shipping &amp; Terms</p>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-700">
+              {pi.airway_bill && (
+                <>
+                  <dt className="font-semibold text-slate-600">Airway Bill</dt>
+                  <dd className="font-mono">{pi.airway_bill}</dd>
+                </>
+              )}
+              {pi.incoterm && (
+                <>
+                  <dt className="font-semibold text-slate-600">Incoterm</dt>
+                  <dd>{pi.incoterm}</dd>
+                </>
+              )}
+              {pi.incoterm_country && (
+                <>
+                  <dt className="font-semibold text-slate-600">Incoterm Country</dt>
+                  <dd>{pi.incoterm_country}</dd>
+                </>
+              )}
+              <dt className="font-semibold text-slate-600">Currency</dt>
+              <dd className="font-semibold">{pi.currency}</dd>
+            </dl>
           </div>
         </div>
 
-        {/* Line Items */}
-        <div className="mb-4">
+        {/* Line items */}
+        <div className="mb-6">
           <p className="section-title">Items</p>
           <div className="overflow-x-auto">
-          <table className="data-table text-xs">
-            <thead>
-              <tr>
-                <th>Item No</th>
-                <th>Description of Goods</th>
-                <th className="text-right">Qty</th>
-                <th className="text-right">Unit Price</th>
-                <th className="text-right">Total Cost</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map(item => (
-                <tr key={item.id}>
-                  <td className="font-mono">{item.item_number}</td>
-                  <td>{item.description}</td>
-                  <td className="text-right">{item.quantity}</td>
-                  <td className="text-right">{pi.currency} {Number(item.unit_price).toFixed(2)}</td>
-                  <td className="text-right font-medium">{pi.currency} {Number(item.total_cost).toFixed(2)}</td>
+            <table className="data-table text-xs">
+              <thead>
+                <tr>
+                  <th>Item No</th>
+                  <th>Description of Goods</th>
+                  <th className="text-right">Qty</th>
+                  <th className="text-right">Unit Price</th>
+                  <th className="text-right">Total Cost</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {items.map(item => (
+                  <tr key={item.id}>
+                    <td className="font-mono">{item.item_number}</td>
+                    <td>{item.description}</td>
+                    <td className="text-right">{item.quantity}</td>
+                    <td className="text-right">{pi.currency} {Number(item.unit_price).toFixed(2)}</td>
+                    <td className="text-right font-semibold">{pi.currency} {Number(item.total_cost).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Totals */}
-        <div className="flex justify-end mb-6">
-          <div className="w-64 space-y-1 text-sm border-t border-gray-200 pt-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Subtotal</span>
-              <span>{pi.currency} {Number(pi.subtotal).toFixed(2)}</span>
-            </div>
-            {pi.tax_rate > 0 && (
+        {/* Totals — structured box */}
+        <div className="flex justify-end mb-8">
+          <div className="w-full sm:w-80 print-box">
+            <p className="print-box-title">Summary</p>
+            <div className="space-y-1.5 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">Tax ({pi.tax_rate}%)</span>
-                <span>{pi.currency} {Number(pi.tax_amount).toFixed(2)}</span>
+                <span className="text-slate-600">Subtotal</span>
+                <span className="font-medium text-slate-900">{pi.currency} {Number(pi.subtotal).toFixed(2)}</span>
               </div>
-            )}
-            <div className="flex justify-between font-bold text-base border-t border-gray-300 pt-2">
-              <span>Total</span>
-              <span className="text-[#1E3A5F]">{formatCurrency(pi.total_amount, pi.currency)}</span>
+              {pi.tax_rate > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Tax ({pi.tax_rate}%)</span>
+                  <span className="font-medium text-slate-900">{pi.currency} {Number(pi.tax_amount).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-bold text-base border-t-2 border-slate-300 pt-2 mt-2">
+                <span className="text-slate-900">Total</span>
+                <span className="text-heritage-900">{formatCurrency(pi.total_amount, pi.currency)}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Notes */}
         {pi.notes && (
-          <div className="text-sm border-t border-gray-100 pt-4">
+          <div className="text-sm">
             <p className="section-title">Notes</p>
-            <p className="text-gray-700 whitespace-pre-line">{pi.notes}</p>
+            <p className="text-slate-700 whitespace-pre-line leading-relaxed">{pi.notes}</p>
           </div>
         )}
       </div>
