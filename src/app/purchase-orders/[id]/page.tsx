@@ -86,10 +86,12 @@ export default function PODetailPage() {
   function getItemRowStyle(item: POItem) {
     const s = dispatchState[item.id]
     if (!s) return ''
-    if (item.fully_shipped) return 'opacity-40 bg-gray-50'
+    if (item.fully_shipped) return 'opacity-40 bg-gray-100'
     if (s.checked) {
-      if (s.avail < item.quantity) return 'bg-amber-50'  // partial
-      return 'bg-green-50'  // full
+      // Partial dispatch (avail < remaining qty) — amber so it stands out
+      if (s.avail < item.quantity - item.shipped_qty) return 'bg-amber-50'
+      // Full remaining qty marked ready — slightly greyed out
+      return 'bg-gray-100 text-gray-500'
     }
     return ''
   }
@@ -199,7 +201,8 @@ export default function PODetailPage() {
                 <tbody>
                   {items.map(item => {
                     const ds = dispatchState[item.id] ?? { avail: 0, checked: false }
-                    const isPartial = ds.checked && ds.avail < item.quantity
+                    const remaining = item.quantity - item.shipped_qty
+                    const isPartial = ds.checked && ds.avail < remaining
                     return (
                       <tr key={item.id} className={getItemRowStyle(item)}>
                         <td className="font-mono">{item.item_number}</td>
