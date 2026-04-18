@@ -70,7 +70,7 @@ Document text:
 ${pdfText}`
 
   const message = await client.messages.create({
-    model: 'claude-opus-4-6',
+    model: 'claude-opus-4-7',
     max_tokens: 4096,
     messages: [{ role: 'user', content: userPrompt }],
     system: systemPrompt,
@@ -162,7 +162,7 @@ Document text:
 ${pdfText}`
 
   const message = await client.messages.create({
-    model: 'claude-opus-4-6',
+    model: 'claude-opus-4-7',
     max_tokens: 4096,
     messages: [{ role: 'user', content: userPrompt }],
     system: systemPrompt,

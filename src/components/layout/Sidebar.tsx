@@ -1,13 +1,15 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   FileText, ShoppingCart, Receipt, Package,
   LayoutDashboard, ChevronRight, ClipboardList,
-  PackageCheck, FileCheck2, Building2
+  PackageCheck, FileCheck2, Building2, LogOut
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 const navItems = [
   {
@@ -50,6 +52,21 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const [email, setEmail] = useState<string | null>(null)
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient()
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null))
+  }, [])
+
+  async function signOut() {
+    await fetch('/api/auth/signout', { method: 'POST' })
+    const supabase = createSupabaseBrowserClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   return (
     <aside className="w-64 flex-shrink-0 bg-[#1a2744] flex flex-col min-h-screen">
@@ -94,8 +111,18 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-white/10">
-        <p className="text-white/30 text-xs text-center">ERP System v2.0</p>
+      <div className="px-3 py-3 border-t border-white/10 space-y-2">
+        {email && (
+          <p className="px-3 text-white/50 text-xs truncate" title={email}>{email}</p>
+        )}
+        <button
+          onClick={signOut}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Sign out</span>
+        </button>
+        <p className="text-white/30 text-xs text-center pt-1">ERP System v2.0</p>
       </div>
     </aside>
   )
