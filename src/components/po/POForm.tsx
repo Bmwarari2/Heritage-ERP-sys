@@ -360,7 +360,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
                       </td>
                       <td><input className="form-input text-xs" value={item.oem ?? ''} onChange={e => setItemField(i, 'oem', e.target.value)} /></td>
                       <td><input className="form-input text-xs" value={item.part_number ?? ''} onChange={e => setItemField(i, 'part_number', e.target.value)} /></td>
-                      <td><input type="number" className="form-input text-right" value={item.quantity} onChange={e => setItemField(i, 'quantity', parseFloat(e.target.value) || 0)} min={0} step={0.001} /></td>
+                      <td><input type="number" className="form-input text-right" value={item.quantity} onChange={e => setItemField(i, 'quantity', parseInt(e.target.value) || 0)} min={0} step={1} /></td>
                       <td><input className="form-input" value={item.unit} onChange={e => setItemField(i, 'unit', e.target.value)} /></td>
                       <td><input type="date" className="form-input text-xs" value={item.delivery_date ?? ''} onChange={e => setItemField(i, 'delivery_date', e.target.value)} /></td>
                       <td><input type="number" className="form-input text-right" value={item.net_price} onChange={e => setItemField(i, 'net_price', parseFloat(e.target.value) || 0)} min={0} step={0.01} /></td>
@@ -369,7 +369,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
                   ) : (
                     <>
                       <td><input className="form-input" value={item.description_short ?? ''} onChange={e => setItemField(i, 'description_short', e.target.value)} placeholder="Item description" /></td>
-                      <td><input type="number" className="form-input text-right" value={item.quantity} onChange={e => setItemField(i, 'quantity', parseFloat(e.target.value) || 0)} min={0} step={0.001} /></td>
+                      <td><input type="number" className="form-input text-right" value={item.quantity} onChange={e => setItemField(i, 'quantity', parseInt(e.target.value) || 0)} min={0} step={1} /></td>
                       <td><input className="form-input" value={item.unit} onChange={e => setItemField(i, 'unit', e.target.value)} /></td>
                       <td><input type="number" className="form-input text-right" value={item.unit_price} onChange={e => setItemField(i, 'unit_price', parseFloat(e.target.value) || 0)} min={0} step={0.01} /></td>
                       <td className="text-right font-medium pr-4">{(Number(item.unit_price) * Number(item.quantity)).toFixed(2)}</td>

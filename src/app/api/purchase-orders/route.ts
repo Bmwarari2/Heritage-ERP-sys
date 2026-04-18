@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
       ...item,
       po_id: po.id,
       sort_order: i,
+      // available_qty defaults to quantity so the vendor sees what's in stock on creation
+      available_qty: item.available_qty ?? item.quantity,
     }))
     await supabase.from('po_items').insert(mapped)
   }

@@ -5,7 +5,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   const supabase = createServerClient()
   const { data, error } = await supabase
     .from('purchase_orders')
-    .select('*, po_items(*), rfqs(rfq_number, buyer_company), dispatch_batches(*, dispatch_batch_items(*))')
+    .select('*, po_items(*), rfqs(rfq_number, buyer_company), dispatch_batches(*, dispatch_batch_items(*), commercial_invoices(id, invoice_number), tax_invoices(id, tax_invoice_number), packing_lists(id))')
     .eq('id', params.id)
     .single()
 
@@ -34,6 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         ...item,
         po_id: params.id,
         sort_order: i,
+        available_qty: item.available_qty ?? item.quantity,
       }))
       await supabase.from('po_items').insert(mapped)
     }
