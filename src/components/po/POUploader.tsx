@@ -15,7 +15,11 @@ export default function POUploader() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   async function handleFile(file: File) {
-    if (!file.name.endsWith('.pdf')) { setError('Please upload a PDF file.'); return }
+    const isPdf = file && (
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf')
+    )
+    if (!isPdf) { setError('Please upload a PDF file.'); return }
     setFileName(file.name)
     setError('')
     setStage('parsing')

@@ -17,7 +17,11 @@ export default function RFQUploader() {
   const router = useRouter()
 
   async function handleFile(file: File) {
-    if (!file || !file.name.endsWith('.pdf')) {
+    const isPdf = file && (
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf')
+    )
+    if (!isPdf) {
       setError('Please upload a PDF file.')
       return
     }
