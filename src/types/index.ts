@@ -8,6 +8,7 @@ export type DocumentStatus = 'draft' | 'sent' | 'responded' | 'closed' | 'active
 export interface Client {
   id: string
   name: string
+  customer_id: string | null
   contact_person: string | null
   email: string | null
   phone: string | null
@@ -18,6 +19,26 @@ export interface Client {
   created_by: string | null
   created_at: string
   updated_at: string
+}
+
+export interface CompanySettings {
+  id?: string
+  company_name: string
+  vat_reg_number: string | null
+  company_reg_number: string | null
+  address: string | null
+  gbp_bank_name: string | null
+  gbp_account_name: string | null
+  gbp_account_number: string | null
+  gbp_sort_code: string | null
+  gbp_iban: string | null
+  gbp_swift: string | null
+  usd_bank_name: string | null
+  usd_account_name: string | null
+  usd_account_number: string | null
+  usd_sort_code: string | null
+  usd_iban: string | null
+  usd_swift: string | null
 }
 export type DocumentSource = 'manual' | 'uploaded'
 export type POType = 'client' | 'standalone'

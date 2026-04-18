@@ -7,7 +7,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   FileText, ShoppingCart, Receipt, Package,
   LayoutDashboard, ClipboardList, FileCheck2,
-  LogOut, Users, Search, X, Menu,
+  LogOut, Users, Search, X, Menu, Settings, UserCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
@@ -21,12 +21,15 @@ const navItems = [
   { label: 'Commercial Invoices',href: '/commercial-invoices', icon: Receipt,         group: 'Dispatch' },
   { label: 'Tax Invoices',       href: '/tax-invoices',        icon: FileCheck2,      group: 'Dispatch' },
   { label: 'Packing Lists',      href: '/packing-lists',       icon: Package,         group: 'Dispatch' },
+  { label: 'Company Settings',   href: '/settings/company',   icon: Settings,        group: 'Admin' },
+  { label: 'My Account',         href: '/account',             icon: UserCircle,      group: 'Admin' },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [email, setEmail] = useState<string | null>(null)
+  const [displayName, setDisplayName] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -39,6 +42,7 @@ export default function Sidebar() {
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null))
+    fetch('/api/auth/profile').then(r => r.json()).then(p => setDisplayName(p?.full_name ?? null)).catch(() => {})
   }, [])
 
   // Close mobile menu on route change
@@ -129,12 +133,15 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="px-4 py-3 border-t border-white/10 space-y-2">
         {email && (
-          <div className="flex items-center gap-2 px-1">
+          <Link href="/account" className="flex items-center gap-2 px-1 hover:opacity-80 transition-opacity">
             <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white/80 text-xs font-bold">
-              {email.charAt(0).toUpperCase()}
+              {(displayName || email).charAt(0).toUpperCase()}
             </div>
-            <p className="text-white/70 text-xs truncate" title={email}>{email}</p>
-          </div>
+            <div className="min-w-0">
+              {displayName && <p className="text-white/90 text-xs font-medium truncate">{displayName}</p>}
+              <p className="text-white/50 text-[10px] truncate" title={email}>{email}</p>
+            </div>
+          </Link>
         )}
         <button
           onClick={signOut}

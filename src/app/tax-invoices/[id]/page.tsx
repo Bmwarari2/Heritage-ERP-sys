@@ -10,6 +10,12 @@ import StatusBadge from '@/components/shared/StatusBadge'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import type { TaxInvoice } from '@/types'
 
+function addDays(dateStr: string, days: number): string {
+  const d = new Date(dateStr)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
 function TIContent() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
@@ -23,13 +29,15 @@ function TIContent() {
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState(isNew)
 
+  const todayStr = new Date().toISOString().slice(0, 10)
+
   const [form, setForm] = useState({
     po_id: poId ?? '', batch_id: batchId ?? '', purchase_order_number: '',
     customer_name: '', customer_id: '', customer_address: '', customer_phone: '',
-    payment_due_date: '', sales_person: '', payment_terms: 'Net 30',
-    order_date: new Date().toISOString().slice(0, 10),
-    invoice_date: new Date().toISOString().slice(0, 10),
-    delivery_date: '', shipping_terms: '',
+    payment_due_date: addDays(todayStr, 30), sales_person: '', payment_terms: 'Net 30',
+    order_date: todayStr,
+    invoice_date: todayStr,
+    shipping_terms: '',
     vat_reg_number: '', company_reg_number: '',
     currency: 'GBP', sales_tax_rate: '0', notes: '', status: 'draft' as string,
     bank_name: '', bank_account_name: 'Heritage Global Solutions Ltd',
@@ -37,6 +45,33 @@ function TIContent() {
   })
 
   const [items, setItems] = useState([{ item_number: '1', item_description: '', quantity: 1, unit_price: 0 }])
+
+  // Auto-load company settings to pre-fill VAT/Reg and bank details
+  useEffect(() => {
+    fetch('/api/settings/company').then(r => r.json()).then(s => {
+      if (!s || s.error) return
+      setForm(f => ({
+        ...f,
+        vat_reg_number: f.vat_reg_number || s.vat_reg_number || '',
+        company_reg_number: f.company_reg_number || s.company_reg_number || '',
+        bank_name: f.bank_name || (f.currency === 'USD' ? s.usd_bank_name : s.gbp_bank_name) || '',
+        bank_account_name: f.bank_account_name || (f.currency === 'USD' ? s.usd_account_name : s.gbp_account_name) || 'Heritage Global Solutions Ltd',
+        bank_account_number: f.bank_account_number || (f.currency === 'USD' ? s.usd_account_number : s.gbp_account_number) || '',
+        bank_sort_code: f.bank_sort_code || (f.currency === 'USD' ? s.usd_sort_code : s.gbp_sort_code) || '',
+        bank_iban: f.bank_iban || (f.currency === 'USD' ? s.usd_iban : s.gbp_iban) || '',
+        bank_swift: f.bank_swift || (f.currency === 'USD' ? s.usd_swift : s.gbp_swift) || '',
+      }))
+    }).catch(() => {})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-populate logged-in user as sales_person for new TIs
+  useEffect(() => {
+    if (!isNew) return
+    fetch('/api/auth/profile').then(r => r.json()).then(p => {
+      if (p?.full_name) setForm(f => ({ ...f, sales_person: f.sales_person || p.full_name }))
+    }).catch(() => {})
+  }, [isNew])
 
   useEffect(() => {
     if (!isNew) {
@@ -47,10 +82,11 @@ function TIContent() {
           purchase_order_number: data.purchase_order_number ?? '',
           customer_name: data.customer_name ?? '', customer_id: data.customer_id ?? '',
           customer_address: data.customer_address ?? '', customer_phone: data.customer_phone ?? '',
-          payment_due_date: data.payment_due_date ?? '', sales_person: data.sales_person ?? '',
+          payment_due_date: data.payment_due_date ?? addDays(data.invoice_date, 30),
+          sales_person: data.sales_person ?? '',
           payment_terms: data.payment_terms ?? 'Net 30',
-          order_date: data.order_date ?? new Date().toISOString().slice(0, 10),
-          invoice_date: data.invoice_date, delivery_date: data.delivery_date ?? '',
+          order_date: data.order_date ?? todayStr,
+          invoice_date: data.invoice_date,
           shipping_terms: data.shipping_terms ?? '', vat_reg_number: data.vat_reg_number ?? '',
           company_reg_number: data.company_reg_number ?? '', currency: data.currency,
           sales_tax_rate: String(data.sales_tax_rate ?? '0'), notes: data.notes ?? '',
@@ -66,24 +102,49 @@ function TIContent() {
         })) ?? [])
       })
     } else if (batchId) {
-      // Prefill from dispatch batch
       fetch(`/api/dispatch-batches/${batchId}`).then(r => r.json()).then(batch => {
         if (!batch?.purchase_orders) return
         const po = batch.purchase_orders
         const customerAddr = [po.bill_to_site, po.bill_to_po_box ? `PO Box ${po.bill_to_po_box}` : null,
           po.bill_to_town, po.bill_to_country].filter(Boolean).join('\n')
-        setForm(f => ({
-          ...f,
-          purchase_order_number: po.po_number ?? '',
-          currency: po.currency ?? 'GBP',
-          payment_terms: po.payment_terms ?? f.payment_terms,
-          shipping_terms: po.inco_terms ?? '',
-          order_date: po.po_date ?? f.order_date,
-          sales_person: po.sales_person ?? '',
-          customer_name: po.bill_to_company ?? po.ship_to_company ?? '',
-          customer_address: customerAddr,
-          customer_phone: po.vendor_phone ?? '',
-        }))
+        // Fetch company settings for bank details matching PO currency
+        fetch('/api/settings/company').then(r => r.json()).then(s => {
+          const cur = po.currency ?? 'GBP'
+          const isUSD = cur === 'USD'
+          setForm(f => ({
+            ...f,
+            purchase_order_number: po.po_number ?? '',
+            currency: cur,
+            payment_terms: po.payment_terms ?? f.payment_terms,
+            shipping_terms: po.inco_terms ?? '',
+            order_date: po.po_date ?? f.order_date,
+            sales_person: po.sales_person ?? f.sales_person,
+            customer_name: po.bill_to_company ?? po.ship_to_company ?? '',
+            customer_address: customerAddr,
+            customer_phone: po.vendor_phone ?? '',
+            vat_reg_number: s?.vat_reg_number || f.vat_reg_number,
+            company_reg_number: s?.company_reg_number || f.company_reg_number,
+            bank_name: isUSD ? (s?.usd_bank_name || '') : (s?.gbp_bank_name || ''),
+            bank_account_name: isUSD ? (s?.usd_account_name || 'Heritage Global Solutions Ltd') : (s?.gbp_account_name || 'Heritage Global Solutions Ltd'),
+            bank_account_number: isUSD ? (s?.usd_account_number || '') : (s?.gbp_account_number || ''),
+            bank_sort_code: isUSD ? (s?.usd_sort_code || '') : (s?.gbp_sort_code || ''),
+            bank_iban: isUSD ? (s?.usd_iban || '') : (s?.gbp_iban || ''),
+            bank_swift: isUSD ? (s?.usd_swift || '') : (s?.gbp_swift || ''),
+          }))
+        }).catch(() => {
+          setForm(f => ({
+            ...f,
+            purchase_order_number: po.po_number ?? '',
+            currency: po.currency ?? 'GBP',
+            payment_terms: po.payment_terms ?? f.payment_terms,
+            shipping_terms: po.inco_terms ?? '',
+            order_date: po.po_date ?? f.order_date,
+            sales_person: po.sales_person ?? f.sales_person,
+            customer_name: po.bill_to_company ?? po.ship_to_company ?? '',
+            customer_address: customerAddr,
+            customer_phone: po.vendor_phone ?? '',
+          }))
+        })
         const batchItems = (batch.dispatch_batch_items ?? [])
           .map((bi: { dispatched_qty: number; po_items: { item_number: string; description_short: string | null; description_full: string | null; net_price: number; unit_price: number } }) => {
             const po_item = bi.po_items
@@ -98,9 +159,20 @@ function TIContent() {
         if (batchItems.length > 0) setItems(batchItems)
       })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, batchId, isNew])
 
-  function setField(key: string, value: string) { setForm(f => ({ ...f, [key]: value })) }
+  function setField(key: string, value: string) {
+    setForm(f => {
+      const updated = { ...f, [key]: value }
+      // When invoice_date changes, recalculate payment_due_date
+      if (key === 'invoice_date' && value) {
+        updated.payment_due_date = addDays(value, 30)
+      }
+      return updated
+    })
+  }
+
   function setItemField(i: number, key: string, value: string | number) {
     setItems(items => items.map((item, idx) => idx === i ? { ...item, [key]: value } : item))
   }
@@ -147,11 +219,10 @@ function TIContent() {
               <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Payment & Order Details</h3></div>
               <div className="card-body space-y-3">
                 <div><label className="form-label">Invoice Date</label><input type="date" className="form-input" value={form.invoice_date} onChange={e => setField('invoice_date', e.target.value)} /></div>
-                <div><label className="form-label">Payment Due Date</label><input type="date" className="form-input" value={form.payment_due_date} onChange={e => setField('payment_due_date', e.target.value)} /></div>
+                <div><label className="form-label">Payment Due Date (auto: +30 days)</label><input type="date" className="form-input" value={form.payment_due_date} onChange={e => setField('payment_due_date', e.target.value)} /></div>
                 <div><label className="form-label">Payment Terms</label><input className="form-input" value={form.payment_terms} onChange={e => setField('payment_terms', e.target.value)} /></div>
                 <div><label className="form-label">Sales Person</label><input className="form-input" value={form.sales_person} onChange={e => setField('sales_person', e.target.value)} /></div>
                 <div><label className="form-label">PO Number</label><input className="form-input" value={form.purchase_order_number} onChange={e => setField('purchase_order_number', e.target.value)} /></div>
-                <div><label className="form-label">Delivery Date</label><input type="date" className="form-input" value={form.delivery_date} onChange={e => setField('delivery_date', e.target.value)} /></div>
                 <div><label className="form-label">Shipping Terms</label><input className="form-input" value={form.shipping_terms} onChange={e => setField('shipping_terms', e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="form-label">VAT Reg No</label><input className="form-input" value={form.vat_reg_number} onChange={e => setField('vat_reg_number', e.target.value)} /></div>
@@ -176,8 +247,8 @@ function TIContent() {
                   <tr key={i}>
                     <td><input className="form-input font-mono w-16" value={item.item_number} onChange={e => setItemField(i, 'item_number', e.target.value)} /></td>
                     <td><input className="form-input" value={item.item_description} onChange={e => setItemField(i, 'item_description', e.target.value)} /></td>
-                    <td><input type="number" className="form-input text-right w-20" value={item.quantity} onChange={e => setItemField(i, 'quantity', parseFloat(e.target.value) || 0)} /></td>
-                    <td><input type="number" className="form-input text-right w-28" value={item.unit_price} onChange={e => setItemField(i, 'unit_price', parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-right w-20" value={item.quantity === 0 ? '' : item.quantity} onChange={e => setItemField(i, 'quantity', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-right w-28" value={item.unit_price === 0 ? '' : item.unit_price} onChange={e => setItemField(i, 'unit_price', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
                     <td className="text-right font-medium">{(item.quantity * item.unit_price).toFixed(2)}</td>
                     <td><button type="button" onClick={() => setItems(items => items.filter((_, idx) => idx !== i))} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button></td>
                   </tr>
@@ -189,7 +260,7 @@ function TIContent() {
                 <div className="flex justify-between"><span>Sub Total</span><span>{form.currency} {subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between items-center">
                   <span>Sales Tax (%)</span>
-                  <input type="number" className="form-input w-20 text-right py-1" value={form.sales_tax_rate} onChange={e => setField('sales_tax_rate', e.target.value)} />
+                  <input type="number" className="form-input w-20 text-right py-1" value={form.sales_tax_rate === '0' ? '' : form.sales_tax_rate} onChange={e => setField('sales_tax_rate', e.target.value === '' ? '0' : e.target.value)} />
                 </div>
                 <div className="flex justify-between"><span>Tax Amount</span><span>{form.currency} {taxAmount.toFixed(2)}</span></div>
                 <div className="flex justify-between font-bold border-t border-gray-200 pt-2"><span>Total</span><span className="text-[#1E3A5F]">{form.currency} {total.toFixed(2)}</span></div>
@@ -219,7 +290,6 @@ function TIContent() {
 
   if (!ti) return null
 
-  // View / print mode
   const tiSubtotal = Number(ti.subtotal)
   const tiTax = Number(ti.sales_tax_amount)
   const tiTotal = Number(ti.total_amount)
@@ -252,8 +322,6 @@ function TIContent() {
             <p className="section-title mt-3">Order Details</p>
             {ti.purchase_order_number && <p><span className="font-medium">PO No:</span> {ti.purchase_order_number}</p>}
             {ti.order_date && <p><span className="font-medium">Order Date:</span> {formatDate(ti.order_date)}</p>}
-            <p className="section-title mt-3">Delivery</p>
-            {ti.delivery_date && <p><span className="font-medium">Delivery Date:</span> {formatDate(ti.delivery_date)}</p>}
             {ti.shipping_terms && <p><span className="font-medium">Shipping Terms:</span> {ti.shipping_terms}</p>}
           </div>
         </div>

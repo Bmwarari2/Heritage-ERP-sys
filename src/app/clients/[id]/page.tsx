@@ -18,7 +18,7 @@ export default function ClientDetailPage() {
   const [deleting, setDeleting] = useState(false)
 
   const [form, setForm] = useState({
-    name: '', contact_person: '', email: '', phone: '',
+    name: '', customer_id: '', contact_person: '', email: '', phone: '',
     address: '', country: '', vat_number: '', notes: '',
   })
 
@@ -27,6 +27,7 @@ export default function ClientDetailPage() {
       setClient(data)
       setForm({
         name: data.name ?? '',
+        customer_id: data.customer_id ?? '',
         contact_person: data.contact_person ?? '',
         email: data.email ?? '',
         phone: data.phone ?? '',
@@ -81,9 +82,15 @@ export default function ClientDetailPage() {
           <div className="card">
             <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Client Details</h3></div>
             <div className="card-body space-y-4">
-              <div>
-                <label className="form-label">Company / Client Name *</label>
-                <input required className="form-input" value={form.name} onChange={e => setField('name', e.target.value)} />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="sm:col-span-2">
+                  <label className="form-label">Company / Client Name *</label>
+                  <input required className="form-input" value={form.name} onChange={e => setField('name', e.target.value)} />
+                </div>
+                <div>
+                  <label className="form-label">Customer ID (short code)</label>
+                  <input className="form-input font-mono uppercase" placeholder="e.g. GGM" value={form.customer_id} onChange={e => setField('customer_id', e.target.value.toUpperCase())} />
+                </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -152,7 +159,8 @@ export default function ClientDetailPage() {
               </div>
               <div>
                 <h2 className="font-bold text-[#1E3A5F]">{client.name}</h2>
-                {client.contact_person && <p className="text-sm text-gray-500">{client.contact_person}</p>}
+                {client.customer_id && <span className="inline-block mt-0.5 px-2 py-0.5 rounded text-xs font-mono font-bold bg-[#1E3A5F]/10 text-[#1E3A5F]">{client.customer_id}</span>}
+                {client.contact_person && <p className="text-sm text-gray-500 mt-0.5">{client.contact_person}</p>}
               </div>
             </div>
           </div>

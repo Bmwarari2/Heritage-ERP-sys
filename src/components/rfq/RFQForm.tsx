@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Trash2, Save, Loader2 } from 'lucide-react'
-import type { ParsedRFQ, RFQ, RFQItem } from '@/types'
+import type { ParsedRFQ, RFQ, RFQItem, Client } from '@/types'
 
 type FormItem = Partial<RFQItem> & {
   item_number: string
@@ -29,8 +29,22 @@ const EMPTY_ITEM: FormItem = {
 
 export default function RFQForm({ initialData, existing }: RFQFormProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [clients, setClients] = useState<Client[]>([])
+  const [selectedClientId, setSelectedClientId] = useState(searchParams.get('client_id') ?? '')
+
+  useEffect(() => {
+    fetch('/api/clients').then(r => r.json()).then(d => setClients(Array.isArray(d) ? d : [])).catch(() => {})
+  }, [])
+
+  function applyClient(clientId: string) {
+    setSelectedClientId(clientId)
+    const c = clients.find(cl => cl.id === clientId)
+    if (!c) return
+    setForm(f => ({ ...f, buyer_company: c.name }))
+  }
 
   // Header fields
   const [form, setForm] = useState({
@@ -143,6 +157,17 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6 w-full">
       {error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+      )}
+
+      {/* ---- Assign to Client ---- */}
+      {!existing && (
+        <div className="card card-body">
+          <label className="form-label">Assign to Company / Client</label>
+          <select className="form-input max-w-sm" value={selectedClientId} onChange={e => applyClient(e.target.value)}>
+            <option value="">— Select a client (optional) —</option>
+            {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.customer_id ? ` (${c.customer_id})` : ''}</option>)}
+          </select>
+        </div>
       )}
 
       {/* ---- Document Info ---- */}

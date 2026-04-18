@@ -27,7 +27,7 @@ function PLContent() {
     po_id: poId ?? '', batch_id: batchId ?? '',
     customer_po_number: '', our_order_number: '',
     final_destination: '', shipped_via: '', sales_person: '',
-    ship_to_address: '', notes: '', status: 'draft' as string,
+    ship_to_address: '', status: 'draft' as string,
   })
 
   const [items, setItems] = useState([{ item_number: '1', quantity: 1, description: '' }])
@@ -44,13 +44,12 @@ function PLContent() {
           customer_po_number: data.customer_po_number ?? '', our_order_number: data.our_order_number ?? '',
           final_destination: data.final_destination ?? '', shipped_via: data.shipped_via ?? '',
           sales_person: data.sales_person ?? '', ship_to_address: data.ship_to_address ?? '',
-          notes: data.notes ?? '', status: data.status,
+          status: data.status,
         })
         setItems(data.packing_list_items ?? [{ item_number: '1', quantity: 1, description: '' }])
         setBoxes(data.packing_list_boxes?.length > 0 ? data.packing_list_boxes : [{ box_number: 1, box_type: 'Cardboard', dimension_l: 0, dimension_w: 0, dimension_h: 0, gross_weight: 0, notes: '' }])
       })
     } else if (batchId) {
-      // Prefill from dispatch batch
       fetch(`/api/dispatch-batches/${batchId}`).then(r => r.json()).then(batch => {
         if (!batch?.purchase_orders) return
         const po = batch.purchase_orders
@@ -69,11 +68,7 @@ function PLContent() {
           .map((bi: { dispatched_qty: number; po_items: { item_number: string; description_short: string | null; description_full: string | null } }) => {
             const po_item = bi.po_items
             const desc = [po_item.description_short, po_item.description_full].filter(Boolean).join(' — ')
-            return {
-              item_number: po_item.item_number,
-              quantity: bi.dispatched_qty,
-              description: desc,
-            }
+            return { item_number: po_item.item_number, quantity: bi.dispatched_qty, description: desc }
           })
         if (batchItems.length > 0) setItems(batchItems)
       })
@@ -112,7 +107,8 @@ function PLContent() {
         <div className="space-y-6 w-full">
           <div className="card">
             <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Packing List Details</h3></div>
-            <div className="card-body grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/* Condensed inline row for all header fields */}
+            <div className="card-body grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <div><label className="form-label">Customer PO Number</label><input className="form-input" value={form.customer_po_number} onChange={e => setField('customer_po_number', e.target.value)} /></div>
               <div><label className="form-label">Our Order No</label><input className="form-input" value={form.our_order_number} onChange={e => setField('our_order_number', e.target.value)} /></div>
               <div><label className="form-label">Final Destination</label><input className="form-input" value={form.final_destination} onChange={e => setField('final_destination', e.target.value)} /></div>
@@ -125,7 +121,7 @@ function PLContent() {
             </div>
           </div>
 
-          {/* Items */}
+          {/* Items — no Item No column */}
           <div className="card">
             <div className="card-header">
               <h3 className="font-semibold text-[#1E3A5F]">Items</h3>
@@ -134,12 +130,11 @@ function PLContent() {
               </button>
             </div>
             <table className="data-table">
-              <thead><tr><th className="w-20">Item No</th><th className="w-24">Quantity</th><th>Description</th><th className="w-10"></th></tr></thead>
+              <thead><tr><th className="text-center w-28">Quantity</th><th>Description</th><th className="w-10"></th></tr></thead>
               <tbody>
                 {items.map((item, i) => (
                   <tr key={i}>
-                    <td><input className="form-input font-mono" value={item.item_number} onChange={e => setItemField(i, 'item_number', e.target.value)} /></td>
-                    <td><input type="number" className="form-input text-right" value={item.quantity} onChange={e => setItemField(i, 'quantity', parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-center" value={item.quantity === 0 ? '' : item.quantity} onChange={e => setItemField(i, 'quantity', e.target.value === '' ? 0 : parseInt(e.target.value) || 0)} /></td>
                     <td><input className="form-input" value={item.description} onChange={e => setItemField(i, 'description', e.target.value)} /></td>
                     <td><button type="button" onClick={() => setItems(items => items.filter((_, idx) => idx !== i))} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button></td>
                   </tr>
@@ -157,27 +152,21 @@ function PLContent() {
               </button>
             </div>
             <table className="data-table text-xs">
-              <thead><tr><th>Box No</th><th>Type</th><th>L (cm)</th><th>W (cm)</th><th>H (cm)</th><th>Gross Weight (kg)</th><th>Notes</th><th></th></tr></thead>
+              <thead><tr><th>Box No</th><th>Type</th><th>L (cm)</th><th>W (cm)</th><th>H (cm)</th><th>Gross Weight (kg)</th><th></th></tr></thead>
               <tbody>
                 {boxes.map((box, i) => (
                   <tr key={i}>
-                    <td><input className="form-input w-14 text-center" value={box.box_number} onChange={e => setBoxField(i, 'box_number', parseInt(e.target.value) || 0)} /></td>
+                    <td><input className="form-input w-14 text-center" value={box.box_number === 0 ? '' : box.box_number} onChange={e => setBoxField(i, 'box_number', e.target.value === '' ? 0 : parseInt(e.target.value) || 0)} /></td>
                     <td><input className="form-input" value={box.box_type} onChange={e => setBoxField(i, 'box_type', e.target.value)} /></td>
-                    <td><input type="number" className="form-input text-right w-16" value={box.dimension_l} onChange={e => setBoxField(i, 'dimension_l', parseFloat(e.target.value) || 0)} /></td>
-                    <td><input type="number" className="form-input text-right w-16" value={box.dimension_w} onChange={e => setBoxField(i, 'dimension_w', parseFloat(e.target.value) || 0)} /></td>
-                    <td><input type="number" className="form-input text-right w-16" value={box.dimension_h} onChange={e => setBoxField(i, 'dimension_h', parseFloat(e.target.value) || 0)} /></td>
-                    <td><input type="number" className="form-input text-right w-24" value={box.gross_weight} onChange={e => setBoxField(i, 'gross_weight', parseFloat(e.target.value) || 0)} /></td>
-                    <td><input className="form-input" value={box.notes} onChange={e => setBoxField(i, 'notes', e.target.value)} /></td>
+                    <td><input type="number" className="form-input text-right w-16" value={box.dimension_l === 0 ? '' : box.dimension_l} onChange={e => setBoxField(i, 'dimension_l', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-right w-16" value={box.dimension_w === 0 ? '' : box.dimension_w} onChange={e => setBoxField(i, 'dimension_w', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-right w-16" value={box.dimension_h === 0 ? '' : box.dimension_h} onChange={e => setBoxField(i, 'dimension_h', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-right w-24" value={box.gross_weight === 0 ? '' : box.gross_weight} onChange={e => setBoxField(i, 'gross_weight', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
                     <td><button type="button" onClick={() => setBoxes(boxes => boxes.filter((_, idx) => idx !== i))} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button></td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-
-          <div className="card card-body">
-            <label className="form-label">Notes</label>
-            <textarea className="form-textarea" rows={2} value={form.notes} onChange={e => setField('notes', e.target.value)} />
           </div>
         </div>
       </PageWrapper>
@@ -196,13 +185,15 @@ function PLContent() {
       </div>}>
       <div className="card card-body w-full print-page">
         <DocumentHeader title="PACKING LIST"
-          extra={<div className="text-sm text-gray-600 mt-1 space-y-0.5">
-            {pl.customer_po_number && <p><span className="font-medium">Customer PO No:</span> {pl.customer_po_number}</p>}
-            {pl.our_order_number && <p><span className="font-medium">Our Order No:</span> {pl.our_order_number}</p>}
-            {pl.final_destination && <p><span className="font-medium">Final Destination:</span> {pl.final_destination}</p>}
-            {pl.shipped_via && <p><span className="font-medium">Shipped Via:</span> {pl.shipped_via}</p>}
-            {pl.sales_person && <p><span className="font-medium">Sales Person:</span> {pl.sales_person}</p>}
-          </div>} />
+          extra={
+            <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-0.5 text-sm text-slate-700">
+              {pl.customer_po_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Customer PO:</span> {pl.customer_po_number}</p>}
+              {pl.our_order_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Our Order No:</span> {pl.our_order_number}</p>}
+              {pl.final_destination && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Destination:</span> {pl.final_destination}</p>}
+              {pl.shipped_via && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Shipped Via:</span> {pl.shipped_via}</p>}
+              {pl.sales_person && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Sales Person:</span> {pl.sales_person}</p>}
+            </div>
+          } />
 
         <div className="mb-4 no-print"><StatusBadge status={pl.status} /></div>
 
@@ -213,16 +204,15 @@ function PLContent() {
           </div>
         )}
 
-        {/* Items */}
+        {/* Items — no Item No column, qty centered */}
         <div className="mb-6">
           <p className="section-title">Items</p>
           <table className="data-table text-xs">
-            <thead><tr><th>Item No</th><th className="text-right">Quantity</th><th>Description</th></tr></thead>
+            <thead><tr><th className="text-center w-28">Quantity</th><th>Description</th></tr></thead>
             <tbody>
               {pl.packing_list_items?.map(item => (
                 <tr key={item.id}>
-                  <td className="font-mono">{item.item_number}</td>
-                  <td className="text-right">{item.quantity}</td>
+                  <td className="text-center">{item.quantity}</td>
                   <td>{item.description}</td>
                 </tr>
               ))}
@@ -235,7 +225,7 @@ function PLContent() {
           <div className="mb-4">
             <p className="section-title">Box Details</p>
             <table className="data-table text-xs">
-              <thead><tr><th>Box No</th><th>Type</th><th>Dimensions (LxWxH cm)</th><th className="text-right">Gross Weight (kg)</th><th>Notes</th></tr></thead>
+              <thead><tr><th>Box No</th><th>Type</th><th>Dimensions (L×W×H cm)</th><th className="text-right">Gross Weight (kg)</th></tr></thead>
               <tbody>
                 {pl.packing_list_boxes.map(box => (
                   <tr key={box.id}>
@@ -243,15 +233,12 @@ function PLContent() {
                     <td>{box.box_type}</td>
                     <td>{box.dimension_l} × {box.dimension_w} × {box.dimension_h}</td>
                     <td className="text-right">{box.gross_weight}</td>
-                    <td>{box.notes}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-
-        {pl.notes && <div className="text-sm"><p className="section-title">Notes</p><p>{pl.notes}</p></div>}
       </div>
     </PageWrapper>
   )
