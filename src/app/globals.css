@@ -1,0 +1,145 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --navy: #1a2744;
+    --gold: #c8a84b;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  /* ---- Form elements ---- */
+  .form-label {
+    @apply block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1;
+  }
+
+  .form-input {
+    @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent
+           placeholder:text-gray-400 transition-colors;
+  }
+
+  .form-select {
+    @apply form-input appearance-none cursor-pointer;
+  }
+
+  .form-textarea {
+    @apply form-input resize-y min-h-[80px];
+  }
+
+  /* ---- Buttons ---- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
+           transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-[#1a2744] text-white hover:bg-[#243561] focus:ring-[#1a2744];
+  }
+
+  .btn-secondary {
+    @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-300;
+  }
+
+  .btn-gold {
+    @apply btn bg-[#c8a84b] text-white hover:bg-[#b5943a] focus:ring-[#c8a84b];
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  /* ---- Cards ---- */
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-100 flex items-center justify-between;
+  }
+
+  .card-body {
+    @apply p-6;
+  }
+
+  /* ---- Tables ---- */
+  .data-table {
+    @apply w-full text-sm text-left;
+  }
+
+  .data-table thead tr {
+    @apply bg-gray-50 border-b border-gray-200;
+  }
+
+  .data-table thead th {
+    @apply px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide;
+  }
+
+  .data-table tbody tr {
+    @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+  }
+
+  .data-table tbody td {
+    @apply px-4 py-3 text-gray-700;
+  }
+
+  /* ---- Status badges ---- */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* ---- Section dividers ---- */
+  .section-title {
+    @apply text-sm font-bold text-[#1a2744] uppercase tracking-widest mb-3 pb-1 border-b-2 border-[#c8a84b];
+  }
+}
+
+/* ---- Print styles ---- */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+    font-size: 11px;
+    font-family: Arial, sans-serif;
+  }
+
+  .print-page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm 20mm;
+    margin: 0 auto;
+    background: white;
+    page-break-after: always;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm 20mm;
+  }
+}
