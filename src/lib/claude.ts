@@ -179,7 +179,7 @@ ${pdfText}`
 
   const message = await client.messages.create({
     model: 'claude-opus-4-7',
-    max_tokens: 8192,
+    max_tokens: 32768,
     messages: [{ role: 'user', content: userPrompt }],
     system: systemPrompt,
   })
