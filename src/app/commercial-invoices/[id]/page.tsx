@@ -56,7 +56,6 @@ function CIContent() {
         })) ?? [])
       })
     } else if (batchId) {
-      // Prefill from dispatch batch
       fetch(`/api/dispatch-batches/${batchId}`).then(r => r.json()).then(batch => {
         if (!batch?.purchase_orders) return
         const po = batch.purchase_orders
@@ -70,6 +69,7 @@ function CIContent() {
           purchase_order_number: po.po_number ?? '',
           currency: po.currency ?? 'GBP',
           terms_of_sale: po.inco_terms ?? '',
+          final_destination: po.ship_to_country ?? '',
           shipper_address: shipperAddr,
           consignee_name: po.bill_to_company ?? po.ship_to_company ?? '',
           consignee_address: shipTo,
@@ -167,8 +167,8 @@ function CIContent() {
                   <tr key={i}>
                     <td><input className="form-input font-mono w-16" value={item.item_number} onChange={e => setItemField(i, 'item_number', e.target.value)} /></td>
                     <td><input className="form-input" value={item.product_description} onChange={e => setItemField(i, 'product_description', e.target.value)} /></td>
-                    <td><input type="number" className="form-input text-right w-24" value={item.quantity} onChange={e => setItemField(i, 'quantity', parseFloat(e.target.value) || 0)} /></td>
-                    <td><input type="number" className="form-input text-right w-28" value={item.unit_price} onChange={e => setItemField(i, 'unit_price', parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-right w-24" value={item.quantity === 0 ? '' : item.quantity} onChange={e => setItemField(i, 'quantity', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
+                    <td><input type="number" className="form-input text-right w-28" value={item.unit_price === 0 ? '' : item.unit_price} onChange={e => setItemField(i, 'unit_price', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)} /></td>
                     <td className="text-right font-medium">{(item.quantity * item.unit_price).toFixed(2)}</td>
                     <td><button type="button" onClick={() => setItems(items => items.filter((_, idx) => idx !== i))} className="p-1 text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button></td>
                   </tr>
@@ -193,24 +193,27 @@ function CIContent() {
 
   if (!ci) return null
 
-  // View mode
+  // View / print mode
   return (
     <PageWrapper title={`Commercial Invoice — ${ci.invoice_number}`}
       actions={<div className="flex gap-2">
         <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
         {ci.po_id && <Link href={`/purchase-orders/${ci.po_id}`} className="btn btn-secondary btn-sm">View PO</Link>}
-        <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}><Printer className="w-4 h-4" /> Edit</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
         <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
       </div>}>
       <div className="card card-body w-full print-page">
         <DocumentHeader title="COMMERCIAL INVOICE" docNumber={ci.invoice_number} docDate={formatDate(ci.invoice_date)}
-          extra={<div className="text-sm text-gray-600 mt-1 space-y-0.5">
-            {ci.purchase_order_number && <p><span className="font-medium">PO No:</span> {ci.purchase_order_number}</p>}
-            {ci.awb_bl_number && <p><span className="font-medium">AWB/BL:</span> {ci.awb_bl_number}</p>}
-            <p><span className="font-medium">Currency:</span> {ci.currency}</p>
-            {ci.terms_of_sale && <p><span className="font-medium">Terms:</span> {ci.terms_of_sale}</p>}
-            {ci.country_of_origin && <p><span className="font-medium">Country of Origin:</span> {ci.country_of_origin}</p>}
-          </div>} />
+          extra={
+            <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-0.5 text-sm text-slate-700">
+              {ci.purchase_order_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">PO No:</span> {ci.purchase_order_number}</p>}
+              {ci.awb_bl_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">AWB/BL:</span> {ci.awb_bl_number}</p>}
+              <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Currency:</span> {ci.currency}</p>
+              {ci.terms_of_sale && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Terms of Sale:</span> {ci.terms_of_sale}</p>}
+              {ci.final_destination && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Final Destination:</span> {ci.final_destination}</p>}
+              {ci.country_of_origin && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Country of Origin:</span> {ci.country_of_origin}</p>}
+            </div>
+          } />
         <div className="mb-4 no-print"><StatusBadge status={ci.status} /></div>
         <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
           <div>
@@ -222,9 +225,8 @@ function CIContent() {
             <p className="section-title">Consignee</p>
             <p className="font-medium">{ci.consignee_name}</p>
             {ci.consignee_address && <p className="whitespace-pre-line">{ci.consignee_address}</p>}
-            {ci.notify_party && <p className="mt-1"><span className="font-medium">Notify:</span> {ci.notify_party}</p>}
-            {ci.intermediate_consignee && <p><span className="font-medium">Intermediate:</span> {ci.intermediate_consignee}</p>}
-            {ci.final_destination && <p><span className="font-medium">Final Destination:</span> {ci.final_destination}</p>}
+            {ci.notify_party && <p className="mt-1"><span className="font-medium">Notify Party:</span> {ci.notify_party}</p>}
+            {ci.intermediate_consignee && <p><span className="font-medium">Intermediate Consignee:</span> {ci.intermediate_consignee}</p>}
           </div>
         </div>
         <table className="data-table text-xs mb-4">

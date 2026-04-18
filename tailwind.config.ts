@@ -52,8 +52,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        serif: ['Georgia', 'Times New Roman', 'serif'],
+        sans: ['"Book Antiqua"', '"Palatino Linotype"', 'Palatino', 'Georgia', 'serif'],
+        serif: ['"Book Antiqua"', '"Palatino Linotype"', 'Palatino', 'Georgia', 'serif'],
         script: ['"Brush Script MT"', '"Segoe Script"', 'cursive'],
       },
       boxShadow: {

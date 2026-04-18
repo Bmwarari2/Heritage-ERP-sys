@@ -11,7 +11,7 @@ export default function NewClientPage() {
   const [error, setError] = useState('')
 
   const [form, setForm] = useState({
-    name: '', contact_person: '', email: '', phone: '',
+    name: '', customer_id: '', contact_person: '', email: '', phone: '',
     address: '', country: '', vat_number: '', notes: '',
   })
 
@@ -50,9 +50,15 @@ export default function NewClientPage() {
         <div className="card">
           <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Client Details</h3></div>
           <div className="card-body space-y-4">
-            <div>
-              <label className="form-label">Company / Client Name *</label>
-              <input required className="form-input" value={form.name} onChange={e => setField('name', e.target.value)} placeholder="e.g. Acme Corporation" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
+                <label className="form-label">Company / Client Name *</label>
+                <input required className="form-input" value={form.name} onChange={e => setField('name', e.target.value)} placeholder="e.g. Acme Corporation" />
+              </div>
+              <div>
+                <label className="form-label">Customer ID (short code)</label>
+                <input className="form-input font-mono uppercase" placeholder="e.g. GGM" value={form.customer_id} onChange={e => setField('customer_id', e.target.value.toUpperCase())} />
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

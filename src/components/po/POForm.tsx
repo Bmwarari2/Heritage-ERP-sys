@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus, Trash2, Save, Loader2 } from 'lucide-react'
-import type { RFQ, PurchaseOrder, POItem, ParsedPO } from '@/types'
+import type { RFQ, PurchaseOrder, POItem, ParsedPO, Client } from '@/types'
 
 type FormItem = Partial<POItem> & {
   item_number: string; quantity: number; unit: string
@@ -32,8 +32,28 @@ const EMPTY_STANDALONE_ITEM: FormItem = {
 
 export default function POForm({ poType, rfq, existing, parsedData }: POFormProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [clients, setClients] = useState<Client[]>([])
+  const [selectedClientId, setSelectedClientId] = useState(searchParams.get('client_id') ?? '')
+
+  useEffect(() => {
+    fetch('/api/clients').then(r => r.json()).then(d => setClients(Array.isArray(d) ? d : [])).catch(() => {})
+  }, [])
+
+  function applyClient(clientId: string) {
+    setSelectedClientId(clientId)
+    const c = clients.find(cl => cl.id === clientId)
+    if (!c) return
+    setForm(f => ({
+      ...f,
+      bill_to_company: c.name,
+      ship_to_company: c.name,
+      ship_to_country: c.country ?? f.ship_to_country,
+      bill_to_country: c.country ?? f.bill_to_country,
+    }))
+  }
 
   const pd = parsedData
 
@@ -189,6 +209,17 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full">
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
+
+      {/* ---- Assign to Client ---- */}
+      {!existing && (
+        <div className="card card-body">
+          <label className="form-label">Assign to Company / Client</label>
+          <select className="form-input max-w-sm" value={selectedClientId} onChange={e => applyClient(e.target.value)}>
+            <option value="">— Select a client (optional) —</option>
+            {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.customer_id ? ` (${c.customer_id})` : ''}</option>)}
+          </select>
+        </div>
+      )}
 
       {/* Document Info */}
       <div className="card">
