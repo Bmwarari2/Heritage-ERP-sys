@@ -40,7 +40,12 @@ export default function PODetailPage() {
     setPo(data)
     const state: Record<string, { avail: number; checked: boolean }> = {}
     for (const item of (data.po_items ?? [])) {
-      state[item.id] = { avail: Math.round(item.available_qty ?? item.quantity ?? 0), checked: item.ready_to_ship ?? false }
+      // Default avail to full remaining qty when nothing has been set yet
+      const remaining = Math.round((item.quantity ?? 0) - (item.shipped_qty ?? 0))
+      const avail = (item.available_qty == null || (item.available_qty === 0 && item.shipped_qty === 0))
+        ? remaining
+        : Math.round(item.available_qty)
+      state[item.id] = { avail, checked: item.ready_to_ship ?? false }
     }
     setDispatchState(state)
     setLoading(false)
