@@ -168,7 +168,7 @@ function CIContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
         {ci.po_id && <Link href={`/purchase-orders/${ci.po_id}`} className="btn btn-secondary btn-sm">View PO</Link>}
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}><Printer className="w-4 h-4" /> Edit</button>
-        <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+        <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
       </div>}>
       <div className="card card-body max-w-5xl print-page">
         <DocumentHeader title="COMMERCIAL INVOICE" docNumber={ci.invoice_number} docDate={formatDate(ci.invoice_date)}

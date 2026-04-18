@@ -3,6 +3,22 @@
 // ============================================================
 
 export type DocumentStatus = 'draft' | 'sent' | 'responded' | 'closed' | 'active' | 'partial' | 'complete' | 'cancelled' | 'issued' | 'paid' | 'accepted'
+
+// ---- CLIENTS ---------------------------------------------------
+export interface Client {
+  id: string
+  name: string
+  contact_person: string | null
+  email: string | null
+  phone: string | null
+  address: string | null
+  country: string | null
+  vat_number: string | null
+  notes: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
 export type DocumentSource = 'manual' | 'uploaded'
 export type POType = 'client' | 'standalone'
 
@@ -90,6 +106,7 @@ export interface ProformaInvoice {
   total_amount: number
   notes: string | null
   status: DocumentStatus
+  client_id: string | null
   created_by: string | null
   created_at: string
   updated_at: string

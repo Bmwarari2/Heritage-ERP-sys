@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   FileText, ShoppingCart, Receipt, Package,
   LayoutDashboard, ChevronRight, ClipboardList,
-  PackageCheck, FileCheck2, Building2, LogOut
+  PackageCheck, FileCheck2, Building2, LogOut, Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
@@ -16,6 +16,12 @@ const navItems = [
     label: 'Dashboard',
     href: '/',
     icon: LayoutDashboard,
+  },
+  {
+    label: 'Clients',
+    href: '/clients',
+    icon: Users,
+    description: 'Client directory',
   },
   {
     label: 'RFQ',

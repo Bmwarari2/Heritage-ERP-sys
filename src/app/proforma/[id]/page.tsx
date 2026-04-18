@@ -48,11 +48,11 @@ export default function ProformaDetailPage() {
             <Link href={`/rfq/${pi.rfq_id}`} className="btn btn-secondary btn-sm">View RFQ</Link>
           )}
           <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}><Edit2 className="w-4 h-4" /> Edit</button>
-          <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+          <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
         </div>
       }
     >
-      <div className="card card-body max-w-5xl print-page">
+      <div className="card card-body w-full max-w-5xl print-page">
         <DocumentHeader
           title="PROFORMA INVOICE"
           docNumber={pi.proforma_number}
@@ -70,7 +70,7 @@ export default function ProformaDetailPage() {
         <div className="mb-5 no-print"><StatusBadge status={pi.status} /></div>
 
         {/* Sent To / Shipping */}
-        <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 text-sm">
           <div>
             <p className="section-title">Sent To</p>
             <p className="font-medium">{pi.client_company}</p>
@@ -91,6 +91,7 @@ export default function ProformaDetailPage() {
         {/* Line Items */}
         <div className="mb-4">
           <p className="section-title">Items</p>
+          <div className="overflow-x-auto">
           <table className="data-table text-xs">
             <thead>
               <tr>
@@ -113,6 +114,7 @@ export default function ProformaDetailPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Totals */}

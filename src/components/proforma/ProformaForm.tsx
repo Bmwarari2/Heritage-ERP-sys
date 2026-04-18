@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Save, Loader2, StickyNote } from 'lucide-react'
-import type { RFQ, ProformaInvoice, ProformaItem } from '@/types'
+import type { RFQ, ProformaInvoice, ProformaItem, Client } from '@/types'
 
 type FormItem = {
   item_number: string
@@ -23,18 +23,24 @@ const EMPTY_ITEM: FormItem = {
   item_number: '', description: '', quantity: 1, unit: 'EA', unit_price: 0, internal_notes: '',
 }
 
+function buildVendorAddress(rfq: RFQ) {
+  return [rfq.vendor_address_line1, rfq.vendor_city, rfq.vendor_post_code, rfq.vendor_country]
+    .filter(Boolean).join(', ')
+}
+
 export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [showNotes, setShowNotes] = useState<Record<number, boolean>>({})
+  const [clients, setClients] = useState<Client[]>([])
 
   const [form, setForm] = useState({
     rfq_id: existing?.rfq_id ?? rfq?.id ?? '',
     invoice_date: existing?.invoice_date ?? new Date().toISOString().slice(0, 10),
-    valid_until_date: existing?.valid_until_date ?? '',
+    valid_until_date: existing?.valid_until_date ?? rfq?.quotation_deadline ?? '',
     client_company: existing?.client_company ?? rfq?.buyer_company ?? '',
-    client_department: existing?.client_department ?? '',
+    client_department: existing?.client_department ?? rfq?.buyer_site ?? '',
     client_address: existing?.client_address ?? rfq?.postal_address ?? '',
     client_country: existing?.client_country ?? rfq?.buyer_country ?? '',
     client_phone: existing?.client_phone ?? rfq?.contact_tel ?? '',
@@ -42,11 +48,12 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
     incoterm: existing?.incoterm ?? '',
     incoterm_country: existing?.incoterm_country ?? '',
     currency: existing?.currency ?? 'GBP',
-    vendor_name: existing?.vendor_name ?? 'Heritage Global Solutions Ltd',
-    vendor_address: existing?.vendor_address ?? '',
+    vendor_name: existing?.vendor_name ?? rfq?.vendor_name ?? 'Heritage Global Solutions Ltd',
+    vendor_address: existing?.vendor_address ?? (rfq ? buildVendorAddress(rfq) : ''),
     notes: existing?.notes ?? '',
     status: existing?.status ?? 'draft',
     tax_rate: existing?.tax_rate ?? 0,
+    client_id: existing?.client_id ?? '',
   })
 
   const [items, setItems] = useState<FormItem[]>(
@@ -60,7 +67,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
     })) ??
     rfq?.rfq_items?.map((i, idx) => ({
       item_number: i.item_number || String((idx + 1) * 10),
-      description: i.description_short ?? i.description_full ?? '',
+      description: [i.description_short, i.description_full ? `(${i.description_full})` : ''].filter(Boolean).join(' '),
       quantity: i.quantity,
       unit: i.unit,
       unit_price: 0,
@@ -68,6 +75,55 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
     })) ??
     [{ ...EMPTY_ITEM, item_number: '10' }]
   )
+
+  // When rfq prop arrives asynchronously (new proforma page fetches it after mount),
+  // fill in any fields that are still empty.
+  useEffect(() => {
+    if (!rfq || existing) return
+    setForm(f => ({
+      ...f,
+      rfq_id: rfq.id,
+      valid_until_date: f.valid_until_date || rfq.quotation_deadline || '',
+      client_company: f.client_company || rfq.buyer_company || '',
+      client_department: f.client_department || rfq.buyer_site || '',
+      client_address: f.client_address || rfq.postal_address || '',
+      client_country: f.client_country || rfq.buyer_country || '',
+      client_phone: f.client_phone || rfq.contact_tel || '',
+      vendor_name: f.vendor_name || rfq.vendor_name || 'Heritage Global Solutions Ltd',
+      vendor_address: f.vendor_address || buildVendorAddress(rfq),
+    }))
+    if (rfq.rfq_items && rfq.rfq_items.length > 0) {
+      setItems(rfq.rfq_items.map((i, idx) => ({
+        item_number: i.item_number || String((idx + 1) * 10),
+        description: [i.description_short, i.description_full ? `(${i.description_full})` : ''].filter(Boolean).join(' '),
+        quantity: i.quantity,
+        unit: i.unit,
+        unit_price: 0,
+        internal_notes: '',
+      })))
+    }
+  }, [rfq?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Load clients for the selector
+  useEffect(() => {
+    fetch('/api/clients').then(r => r.json()).then(data => {
+      if (Array.isArray(data)) setClients(data)
+    }).catch(() => {})
+  }, [])
+
+  function applyClient(clientId: string) {
+    const c = clients.find(cl => cl.id === clientId)
+    if (!c) return
+    setForm(f => ({
+      ...f,
+      client_id: c.id,
+      client_company: c.name,
+      client_department: f.client_department,
+      client_address: c.address ?? '',
+      client_country: c.country ?? '',
+      client_phone: c.phone ?? '',
+    }))
+  }
 
   function setField(key: string, value: string | number) {
     setForm(f => ({ ...f, [key]: value }))
@@ -86,7 +142,6 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
     setItems(items => items.filter((_, idx) => idx !== i))
   }
 
-  // Totals
   const subtotal = items.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0)
   const taxAmount = subtotal * (Number(form.tax_rate) / 100)
   const total = subtotal + taxAmount
@@ -126,19 +181,25 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-6xl">
+    <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-6xl">
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
 
-      {/* Header */}
+      {rfq && (
+        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+          Linked to RFQ <strong>{rfq.rfq_number}</strong> — fields pre-filled from RFQ data. Adjust as needed.
+        </div>
+      )}
+
+      {/* Invoice Details */}
       <div className="card">
         <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Invoice Details</h3></div>
-        <div className="card-body grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="card-body grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <div>
             <label className="form-label">Invoice Date</label>
             <input type="date" className="form-input" value={form.invoice_date} onChange={e => setField('invoice_date', e.target.value)} />
           </div>
           <div>
-            <label className="form-label">Valid Until Date</label>
+            <label className="form-label">Valid Until</label>
             <input type="date" className="form-input" value={form.valid_until_date} onChange={e => setField('valid_until_date', e.target.value)} />
           </div>
           <div>
@@ -170,10 +231,25 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
       </div>
 
       {/* Sent To */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card">
           <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Sent To (Client)</h3></div>
           <div className="card-body space-y-3">
+            {clients.length > 0 && (
+              <div>
+                <label className="form-label">Select existing client</label>
+                <select
+                  className="form-select"
+                  value={form.client_id}
+                  onChange={e => { setField('client_id', e.target.value); applyClient(e.target.value) }}
+                >
+                  <option value="">— type manually —</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div>
               <label className="form-label">Company Name</label>
               <input className="form-input" value={form.client_company} onChange={e => setField('client_company', e.target.value)} />
@@ -246,7 +322,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
                         <textarea
                           className="form-textarea mt-1 text-xs border-amber-300 bg-amber-50"
                           rows={2}
-                          placeholder="Internal notes (not exported to PDF)"
+                          placeholder="Internal notes (not printed)"
                           value={item.internal_notes}
                           onChange={e => setItemField(i, 'internal_notes', e.target.value)}
                         />
@@ -277,7 +353,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
         </div>
 
         {/* Totals */}
-        <div className="flex justify-end px-6 py-4 border-t border-gray-100">
+        <div className="flex justify-end px-4 sm:px-6 py-4 border-t border-gray-100">
           <div className="w-64 space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Subtotal</span>
