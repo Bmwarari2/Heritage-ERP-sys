@@ -52,7 +52,7 @@ export default function ProformaDetailPage() {
         </div>
       }
     >
-      <div className="card card-body w-full max-w-5xl print-page">
+      <div className="card card-body w-full print-page">
         <DocumentHeader
           title="PROFORMA INVOICE"
           docNumber={pi.proforma_number}

@@ -145,6 +145,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
 
     const payload = {
       ...form,
+      rfq_id: form.rfq_id || null,
       purchase_total: purchaseTotal,
       items: items.map(item => ({
         item_number: item.item_number,
@@ -184,7 +185,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-6xl">
+    <form onSubmit={handleSubmit} className="space-y-6 w-full">
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
 
       {/* Document Info */}
