@@ -90,7 +90,7 @@ function CIContent() {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
           </button>
         </div>}>
-        <div className="space-y-6 max-w-5xl">
+        <div className="space-y-6 w-full">
           <div className="card">
             <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Invoice Details</h3></div>
             <div className="card-body grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -170,7 +170,7 @@ function CIContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}><Printer className="w-4 h-4" /> Edit</button>
         <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
       </div>}>
-      <div className="card card-body max-w-5xl print-page">
+      <div className="card card-body w-full print-page">
         <DocumentHeader title="COMMERCIAL INVOICE" docNumber={ci.invoice_number} docDate={formatDate(ci.invoice_date)}
           extra={<div className="text-sm text-gray-600 mt-1 space-y-0.5">
             {ci.purchase_order_number && <p><span className="font-medium">PO No:</span> {ci.purchase_order_number}</p>}

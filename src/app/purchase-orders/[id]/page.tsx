@@ -107,7 +107,7 @@ export default function PODetailPage() {
         </div>
       }
     >
-      <div className="space-y-6 max-w-6xl">
+      <div className="space-y-6 w-full">
         {/* ---- Print Layout ---- */}
         <div className="card card-body print-page">
           <DocumentHeader

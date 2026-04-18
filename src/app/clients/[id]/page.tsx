@@ -76,7 +76,7 @@ export default function ClientDetailPage() {
       <PageWrapper title={`Edit — ${client.name}`} actions={
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancel</button>
       }>
-        <form onSubmit={handleSave} className="space-y-6 w-full max-w-3xl">
+        <form onSubmit={handleSave} className="space-y-6 w-full">
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
           <div className="card">
             <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Client Details</h3></div>
@@ -142,7 +142,7 @@ export default function ClientDetailPage() {
         </div>
       }
     >
-      <div className="space-y-6 max-w-3xl">
+      <div className="space-y-6 w-full">
         {/* Contact info */}
         <div className="card">
           <div className="card-header">

@@ -59,7 +59,7 @@ export default function RFQDetailPage() {
       }
     >
       {/* ---- Print Layout ---- */}
-      <div className="card card-body w-full max-w-5xl print-page" id="rfq-print">
+      <div className="card card-body w-full print-page" id="rfq-print">
         <DocumentHeader
           title="REQUEST FOR QUOTATION"
           docNumber={rfq.rfq_number}

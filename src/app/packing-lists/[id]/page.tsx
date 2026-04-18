@@ -81,7 +81,7 @@ function PLContent() {
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Save
           </button>
         </div>}>
-        <div className="space-y-6 max-w-5xl">
+        <div className="space-y-6 w-full">
           <div className="card">
             <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Packing List Details</h3></div>
             <div className="card-body grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -166,7 +166,7 @@ function PLContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
         <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
       </div>}>
-      <div className="card card-body max-w-5xl print-page">
+      <div className="card card-body w-full print-page">
         <DocumentHeader title="PACKING LIST"
           extra={<div className="text-sm text-gray-600 mt-1 space-y-0.5">
             {pl.customer_po_number && <p><span className="font-medium">Customer PO No:</span> {pl.customer_po_number}</p>}
