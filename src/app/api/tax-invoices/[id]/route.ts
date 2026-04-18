@@ -12,7 +12,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const supabase = createServerClient()
   const body = await request.json()
   const { items, ...tiData } = body
-  const { data, error } = await supabase.from('tax_invoices').update(tiData).eq('id', params.id).select().single()
+
+  // Coerce empty strings to null for DATE columns to avoid Postgres parse errors
+  const dateFields = ['payment_due_date', 'delivery_date', 'order_date', 'invoice_date'] as const
+  for (const f of dateFields) {
+    if (tiData[f] === '') tiData[f] = null
+  }
+
+  const { error } = await supabase.from('tax_invoices').update(tiData).eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (items) {
     await supabase.from('ti_items').delete().eq('ti_id', params.id)
@@ -22,7 +29,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       )
     }
   }
-  return NextResponse.json(data)
+  // Re-fetch with nested items so the client has the full record immediately
+  const { data: full, error: fetchErr } = await supabase
+    .from('tax_invoices').select('*, ti_items(*)').eq('id', params.id).single()
+  if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 })
+  return NextResponse.json(full)
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
