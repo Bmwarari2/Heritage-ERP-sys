@@ -153,6 +153,8 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
 
     const payload = {
       ...form,
+      rfq_id: form.rfq_id || null,
+      client_id: form.client_id || null,
       subtotal,
       tax_amount: taxAmount,
       total_amount: total,
