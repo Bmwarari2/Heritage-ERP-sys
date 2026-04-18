@@ -53,13 +53,13 @@ export default function RFQDetailPage() {
             <FileText className="w-4 h-4" /> Create Proforma
           </Link>
           <button className="btn btn-primary btn-sm" onClick={() => window.print()}>
-            <Printer className="w-4 h-4" /> Print
+            <Printer className="w-4 h-4" /> Download PDF
           </button>
         </div>
       }
     >
       {/* ---- Print Layout ---- */}
-      <div className="card card-body max-w-5xl print-page" id="rfq-print">
+      <div className="card card-body w-full max-w-5xl print-page" id="rfq-print">
         <DocumentHeader
           title="REQUEST FOR QUOTATION"
           docNumber={rfq.rfq_number}
@@ -79,7 +79,7 @@ export default function RFQDetailPage() {
         </div>
 
         {/* Address Grid */}
-        <div className="grid grid-cols-3 gap-6 mb-6 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6 text-sm">
           <div>
             <p className="section-title">Invoicing Details</p>
             <p className="font-medium">{rfq.buyer_company}</p>
@@ -126,6 +126,7 @@ export default function RFQDetailPage() {
         {/* Line Items */}
         <div className="mb-6">
           <p className="section-title">Items</p>
+          <div className="overflow-x-auto">
           <table className="data-table text-xs">
             <thead>
               <tr>
@@ -157,6 +158,7 @@ export default function RFQDetailPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Comments */}

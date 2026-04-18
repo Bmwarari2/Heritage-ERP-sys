@@ -15,8 +15,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+      {/* no-print hides the sidebar when the user prints / saves as PDF */}
+      <div className="no-print flex-shrink-0">
+        <Sidebar />
+      </div>
+      <main className="flex-1 min-w-0 flex flex-col">
+        {children}
+      </main>
     </div>
   )
 }
