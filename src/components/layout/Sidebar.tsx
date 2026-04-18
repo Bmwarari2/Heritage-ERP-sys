@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   FileText, ShoppingCart, Receipt, Package,
   LayoutDashboard, ChevronRight, ClipboardList,
-  PackageCheck, FileCheck2, Building2, LogOut, Users
+  PackageCheck, FileCheck2, Building2, LogOut, Users, Search,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
@@ -60,6 +60,13 @@ export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [email, setEmail] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const q = searchQuery.trim()
+    if (q) { router.push(`/search?q=${encodeURIComponent(q)}`); setSearchQuery('') }
+  }
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -87,6 +94,22 @@ export default function Sidebar() {
             <p className="text-white/50 text-xs">Solutions Ltd</p>
           </div>
         </div>
+      </div>
+
+      {/* Search */}
+      <div className="px-3 py-3 border-b border-white/10">
+        <form onSubmit={handleSearch}>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2 w-3.5 h-3.5 text-white/40 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search…"
+              className="w-full pl-8 pr-3 py-1.5 bg-white/10 rounded-lg text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-white/30"
+            />
+          </div>
+        </form>
       </div>
 
       {/* Navigation */}
