@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Edit2, Printer, ArrowLeft, Loader2, Package, CheckSquare, Square, AlertTriangle } from 'lucide-react'
+import { Edit2, Printer, ArrowLeft, Loader2, Package, CheckSquare, Square, AlertTriangle, ExternalLink } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
 import DocumentHeader from '@/components/shared/DocumentHeader'
@@ -33,12 +33,15 @@ export default function PODetailPage() {
 
   // Local dispatch state (available qty and checkboxes)
   const [dispatchState, setDispatchState] = useState<Record<string, { avail: number; checked: boolean }>>({})
+  // Local extras state (product link and notes — editable inline after PO is saved)
+  const [itemExtras, setItemExtras] = useState<Record<string, { url: string; notes: string }>>({})
 
   async function load() {
     const res = await fetch(`/api/purchase-orders/${id}`)
     const data = await res.json()
     setPo(data)
     const state: Record<string, { avail: number; checked: boolean }> = {}
+    const extras: Record<string, { url: string; notes: string }> = {}
     for (const item of (data.po_items ?? [])) {
       // Default avail to full remaining qty when nothing has been set yet
       const remaining = Math.round((item.quantity ?? 0) - (item.shipped_qty ?? 0))
@@ -46,8 +49,10 @@ export default function PODetailPage() {
         ? remaining
         : Math.round(item.available_qty)
       state[item.id] = { avail, checked: item.ready_to_ship ?? false }
+      extras[item.id] = { url: item.product_url ?? '', notes: item.vendor_notes ?? '' }
     }
     setDispatchState(state)
+    setItemExtras(extras)
     setLoading(false)
   }
 
@@ -60,6 +65,17 @@ export default function PODetailPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ po_item_id: itemId, available_qty: avail, ready_to_ship: checked }),
     })
+  }
+
+  async function saveItemExtra(itemId: string, url: string, notes: string) {
+    await fetch(`/api/purchase-orders/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ po_item_id: itemId, product_url: url, vendor_notes: notes }),
+    })
+    // Reflect normalised URL (https:// may have been prepended server-side)
+    const normalised = url && !/^https?:\/\//i.test(url) ? `https://${url}` : url
+    setItemExtras(s => ({ ...s, [itemId]: { url: normalised, notes } }))
   }
 
   async function createDispatch(docType: 'commercial-invoices' | 'tax-invoices' | 'packing-lists') {
@@ -103,7 +119,12 @@ export default function PODetailPage() {
     )
   }
 
-  const items = po.po_items ?? []
+  // Sort by sort_order (preserving PDF order), then by item_number numerically
+  const items = [...(po.po_items ?? [])].sort((a, b) => {
+    const so = (a.sort_order ?? 0) - (b.sort_order ?? 0)
+    if (so !== 0) return so
+    return (parseInt(a.item_number) || 0) - (parseInt(b.item_number) || 0)
+  })
   const hasReadyItems = items.some(i => dispatchState[i.id]?.checked)
 
   function getItemRowStyle(item: POItem) {
@@ -207,8 +228,8 @@ export default function PODetailPage() {
                         <th>Delivery</th>
                         <th className="text-right">Net Price</th>
                         <th className="text-right">Net Amount</th>
-                        <th className="no-print">Link</th>
-                        <th className="no-print">Notes</th>
+                        <th className="no-print w-36">Product Link</th>
+                        <th className="no-print w-40">Notes</th>
                       </>
                     ) : (
                       <>
@@ -217,8 +238,8 @@ export default function PODetailPage() {
                         <th>Unit</th>
                         <th className="text-right">Unit Price</th>
                         <th className="text-right">Total</th>
-                        <th className="no-print">Link</th>
-                        <th className="no-print">Notes</th>
+                        <th className="no-print w-36">Product Link</th>
+                        <th className="no-print w-40">Notes</th>
                       </>
                     )}
                     {/* Dispatch cols — screen only */}
@@ -248,10 +269,33 @@ export default function PODetailPage() {
                             <td>{formatDate(item.delivery_date)}</td>
                             <td className="text-right">{item.net_price.toFixed(2)}</td>
                             <td className="text-right font-medium">{item.net_amount.toFixed(2)}</td>
-                            <td className="no-print text-xs">
-                              {item.product_url && <a href={item.product_url} target="_blank" rel="noreferrer" className="text-blue-500 underline truncate block max-w-[120px]">Link</a>}
+                            {/* Product link — inline edit, saves on blur */}
+                            <td className="no-print">
+                              <div className="flex items-center gap-1">
+                                <input
+                                  className="form-input text-xs py-0.5 w-full"
+                                  placeholder="Paste link…"
+                                  value={itemExtras[item.id]?.url ?? ''}
+                                  onChange={e => setItemExtras(s => ({ ...s, [item.id]: { ...s[item.id], url: e.target.value } }))}
+                                  onBlur={e => saveItemExtra(item.id, e.target.value, itemExtras[item.id]?.notes ?? '')}
+                                />
+                                {itemExtras[item.id]?.url && (
+                                  <a href={itemExtras[item.id].url} target="_blank" rel="noreferrer" className="text-blue-500 flex-shrink-0">
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </a>
+                                )}
+                              </div>
                             </td>
-                            <td className="no-print text-xs text-gray-500">{item.vendor_notes}</td>
+                            {/* Notes — inline edit, saves on blur */}
+                            <td className="no-print">
+                              <input
+                                className="form-input text-xs py-0.5 w-full"
+                                placeholder="Notes…"
+                                value={itemExtras[item.id]?.notes ?? ''}
+                                onChange={e => setItemExtras(s => ({ ...s, [item.id]: { ...s[item.id], notes: e.target.value } }))}
+                                onBlur={e => saveItemExtra(item.id, itemExtras[item.id]?.url ?? '', e.target.value)}
+                              />
+                            </td>
                           </>
                         ) : (
                           <>
@@ -260,10 +304,31 @@ export default function PODetailPage() {
                             <td>{item.unit}</td>
                             <td className="text-right">{item.unit_price.toFixed(2)}</td>
                             <td className="text-right font-medium">{item.total_price.toFixed(2)}</td>
-                            <td className="no-print text-xs">
-                              {item.product_url && <a href={item.product_url} target="_blank" rel="noreferrer" className="text-blue-500 underline truncate block max-w-[120px]">Link</a>}
+                            <td className="no-print">
+                              <div className="flex items-center gap-1">
+                                <input
+                                  className="form-input text-xs py-0.5 w-full"
+                                  placeholder="Paste link…"
+                                  value={itemExtras[item.id]?.url ?? ''}
+                                  onChange={e => setItemExtras(s => ({ ...s, [item.id]: { ...s[item.id], url: e.target.value } }))}
+                                  onBlur={e => saveItemExtra(item.id, e.target.value, itemExtras[item.id]?.notes ?? '')}
+                                />
+                                {itemExtras[item.id]?.url && (
+                                  <a href={itemExtras[item.id].url} target="_blank" rel="noreferrer" className="text-blue-500 flex-shrink-0">
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </a>
+                                )}
+                              </div>
                             </td>
-                            <td className="no-print text-xs text-gray-500">{item.vendor_notes}</td>
+                            <td className="no-print">
+                              <input
+                                className="form-input text-xs py-0.5 w-full"
+                                placeholder="Notes…"
+                                value={itemExtras[item.id]?.notes ?? ''}
+                                onChange={e => setItemExtras(s => ({ ...s, [item.id]: { ...s[item.id], notes: e.target.value } }))}
+                                onBlur={e => saveItemExtra(item.id, itemExtras[item.id]?.url ?? '', e.target.value)}
+                              />
+                            </td>
                           </>
                         )}
                         {/* Dispatch controls — screen only */}

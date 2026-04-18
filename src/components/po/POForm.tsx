@@ -148,6 +148,8 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
       rfq_id: form.rfq_id || null,
       purchase_total: purchaseTotal,
       items: items.map(item => ({
+        // Include id so the PUT route can preserve shipped/dispatch fields
+        ...(item.id ? { id: item.id } : {}),
         item_number: item.item_number,
         material_code: item.material_code ?? '',
         description_short: item.description_short ?? '',
@@ -163,10 +165,10 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
         per_quantity: Number(item.per_quantity) || 1,
         net_amount: Number(item.net_amount),
         lead_amount: item.lead_amount ? Number(item.lead_amount) : null,
-        product_url: item.product_url ?? '',
-        vendor_notes: item.vendor_notes ?? '',
         unit_price: Number(item.unit_price),
         total_price: Number(item.total_price),
+        // product_url and vendor_notes are managed via inline edit on the PO
+        // detail page after saving — do not send here to avoid overwriting them
       })),
     }
 
@@ -334,8 +336,6 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
                     <th className="w-24">Delivery</th>
                     <th className="w-20">Net Price</th>
                     <th className="w-20 text-right">Net Amount</th>
-                    <th className="w-36">Product Link</th>
-                    <th className="w-40">Notes / Comments</th>
                   </>
                 ) : (
                   <>
@@ -344,8 +344,6 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
                     <th className="w-16">Unit</th>
                     <th className="w-24">Unit Price</th>
                     <th className="w-24 text-right">Total</th>
-                    <th className="w-36">Product Link</th>
-                    <th className="w-40">Notes / Comments</th>
                   </>
                 )}
                 <th className="w-10"></th>
@@ -369,8 +367,6 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
                       <td><input type="date" className="form-input text-xs" value={item.delivery_date ?? ''} onChange={e => setItemField(i, 'delivery_date', e.target.value)} /></td>
                       <td><input type="number" className="form-input text-right" value={item.net_price} onChange={e => setItemField(i, 'net_price', parseFloat(e.target.value) || 0)} min={0} step={0.01} /></td>
                       <td className="text-right font-medium pr-4">{Number(item.net_amount).toFixed(2)}</td>
-                      <td><input type="url" className="form-input text-xs" value={item.product_url ?? ''} onChange={e => setItemField(i, 'product_url', e.target.value)} placeholder="https://…" /></td>
-                      <td><input className="form-input text-xs" value={item.vendor_notes ?? ''} onChange={e => setItemField(i, 'vendor_notes', e.target.value)} placeholder="Optional notes" /></td>
                     </>
                   ) : (
                     <>
@@ -379,8 +375,6 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
                       <td><input className="form-input" value={item.unit} onChange={e => setItemField(i, 'unit', e.target.value)} /></td>
                       <td><input type="number" className="form-input text-right" value={item.unit_price} onChange={e => setItemField(i, 'unit_price', parseFloat(e.target.value) || 0)} min={0} step={0.01} /></td>
                       <td className="text-right font-medium pr-4">{(Number(item.unit_price) * Number(item.quantity)).toFixed(2)}</td>
-                      <td><input type="url" className="form-input text-xs" value={item.product_url ?? ''} onChange={e => setItemField(i, 'product_url', e.target.value)} placeholder="https://…" /></td>
-                      <td><input className="form-input text-xs" value={item.vendor_notes ?? ''} onChange={e => setItemField(i, 'vendor_notes', e.target.value)} placeholder="Optional notes" /></td>
                     </>
                   )}
                   <td>
