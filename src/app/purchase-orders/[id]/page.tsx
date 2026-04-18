@@ -11,6 +11,17 @@ import POForm from '@/components/po/POForm'
 import { formatDate, formatCurrency, cn } from '@/lib/utils'
 import type { PurchaseOrder, POItem } from '@/types'
 
+type BatchDoc = { id: string; invoice_number?: string; tax_invoice_number?: string }
+type DispatchBatch = {
+  id: string
+  batch_number: number
+  dispatched_at: string
+  notes: string | null
+  commercial_invoices?: BatchDoc[]
+  tax_invoices?: BatchDoc[]
+  packing_lists?: BatchDoc[]
+}
+
 export default function PODetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
@@ -27,10 +38,9 @@ export default function PODetailPage() {
     const res = await fetch(`/api/purchase-orders/${id}`)
     const data = await res.json()
     setPo(data)
-    // Initialise dispatch state
     const state: Record<string, { avail: number; checked: boolean }> = {}
     for (const item of (data.po_items ?? [])) {
-      state[item.id] = { avail: item.available_qty ?? 0, checked: item.ready_to_ship ?? false }
+      state[item.id] = { avail: Math.round(item.available_qty ?? item.quantity ?? 0), checked: item.ready_to_ship ?? false }
     }
     setDispatchState(state)
     setLoading(false)
@@ -52,7 +62,6 @@ export default function PODetailPage() {
     if (readyItems.length === 0) { alert('No items marked as ready to ship.'); return }
 
     setDispatching(true)
-    // Create dispatch batch
     const batchRes = await fetch(`/api/purchase-orders/${id}/dispatch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -64,8 +73,17 @@ export default function PODetailPage() {
     const batchData = await batchRes.json()
     if (!batchData.batch) { setDispatching(false); alert('Failed to create dispatch batch'); return }
 
-    // Navigate to create the relevant document
-    router.push(`/${docType}/new?po_id=${id}&batch_id=${batchData.batch.id}`)
+    // Navigate directly to the auto-created document
+    if (docType === 'commercial-invoices' && batchData.ci_id) {
+      router.push(`/commercial-invoices/${batchData.ci_id}`)
+    } else if (docType === 'tax-invoices' && batchData.ti_id) {
+      router.push(`/tax-invoices/${batchData.ti_id}`)
+    } else if (docType === 'packing-lists' && batchData.pl_id) {
+      router.push(`/packing-lists/${batchData.pl_id}`)
+    } else {
+      setDispatching(false)
+      load()
+    }
   }
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>
@@ -88,13 +106,15 @@ export default function PODetailPage() {
     if (!s) return ''
     if (item.fully_shipped) return 'opacity-40 bg-gray-100'
     if (s.checked) {
-      // Partial dispatch (avail < remaining qty) — amber so it stands out
-      if (s.avail < item.quantity - item.shipped_qty) return 'bg-amber-50'
-      // Full remaining qty marked ready — slightly greyed out
-      return 'bg-gray-100 text-gray-500'
+      const remaining = Math.round(item.quantity - item.shipped_qty)
+      if (s.avail < remaining) return 'bg-amber-50'   // partial — stands out
+      return 'bg-gray-100 text-gray-500'              // full qty ready — greyed
     }
     return ''
   }
+
+  const batches = ((po as PurchaseOrder & { dispatch_batches?: DispatchBatch[] }).dispatch_batches ?? [])
+    .sort((a, b) => a.batch_number - b.batch_number)
 
   return (
     <PageWrapper
@@ -201,7 +221,7 @@ export default function PODetailPage() {
                 <tbody>
                   {items.map(item => {
                     const ds = dispatchState[item.id] ?? { avail: 0, checked: false }
-                    const remaining = item.quantity - item.shipped_qty
+                    const remaining = Math.round(item.quantity - item.shipped_qty)
                     const isPartial = ds.checked && ds.avail < remaining
                     return (
                       <tr key={item.id} className={getItemRowStyle(item)}>
@@ -214,7 +234,7 @@ export default function PODetailPage() {
                               {item.description_full && <p className="text-gray-400 text-xs">{item.description_full}</p>}
                             </td>
                             <td>{item.oem} / {item.part_number}</td>
-                            <td className="text-right">{item.quantity.toFixed(3)}</td>
+                            <td className="text-right">{Math.round(item.quantity)}</td>
                             <td>{item.unit}</td>
                             <td>{formatDate(item.delivery_date)}</td>
                             <td className="text-right">{item.net_price.toFixed(2)}</td>
@@ -223,7 +243,7 @@ export default function PODetailPage() {
                         ) : (
                           <>
                             <td>{item.description_short}</td>
-                            <td className="text-right">{item.quantity}</td>
+                            <td className="text-right">{Math.round(item.quantity)}</td>
                             <td>{item.unit}</td>
                             <td className="text-right">{item.unit_price.toFixed(2)}</td>
                             <td className="text-right font-medium">{item.total_price.toFixed(2)}</td>
@@ -241,9 +261,9 @@ export default function PODetailPage() {
                                   isPartial ? "border-amber-400 bg-amber-50" : "")}
                                 value={ds.avail}
                                 min={0}
-                                max={item.quantity - item.shipped_qty}
-                                step={0.001}
-                                onChange={e => updateItemDispatch(item.id, parseFloat(e.target.value) || 0, ds.checked)}
+                                max={remaining}
+                                step={1}
+                                onChange={e => updateItemDispatch(item.id, parseInt(e.target.value) || 0, ds.checked)}
                               />
                               {isPartial && <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />}
                             </div>
@@ -261,7 +281,7 @@ export default function PODetailPage() {
                           )}
                         </td>
                         <td className="no-print text-center text-xs text-gray-500">
-                          {item.shipped_qty > 0 ? item.shipped_qty.toFixed(3) : '—'}
+                          {item.shipped_qty > 0 ? Math.round(item.shipped_qty) : '—'}
                         </td>
                       </tr>
                     )
@@ -303,12 +323,14 @@ export default function PODetailPage() {
             <div className="card-header">
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-[#c8a84b]" />
-                <h3 className="font-semibold text-[#1a2744]">Dispatch & Create Documents</h3>
+                <h3 className="font-semibold text-[#1a2744]">Dispatch &amp; Create Documents</h3>
               </div>
             </div>
             <div className="card-body">
               <p className="text-sm text-gray-600 mb-4">
-                Mark the checkboxes next to items that are ready to ship, enter the available quantity for each, then create one of the dispatch documents below.
+                Mark items ready to ship and set the available quantity, then click a document button.
+                All three documents (Commercial Invoice, Tax Invoice, Packing List) are created automatically —
+                you will be taken to whichever one you click.
               </p>
               <div className="mb-4">
                 <label className="form-label">Dispatch Notes (optional)</label>
@@ -318,15 +340,15 @@ export default function PODetailPage() {
                 <button className="btn btn-primary" disabled={!hasReadyItems || dispatching}
                   onClick={() => createDispatch('commercial-invoices')}>
                   {dispatching ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                  Create Commercial Invoice
+                  Commercial Invoice
                 </button>
                 <button className="btn btn-secondary" disabled={!hasReadyItems || dispatching}
                   onClick={() => createDispatch('tax-invoices')}>
-                  Create Tax Invoice
+                  Tax Invoice
                 </button>
                 <button className="btn btn-gold" disabled={!hasReadyItems || dispatching}
                   onClick={() => createDispatch('packing-lists')}>
-                  Create Packing List
+                  Packing List
                 </button>
               </div>
               {!hasReadyItems && (
@@ -339,32 +361,47 @@ export default function PODetailPage() {
           </div>
         )}
 
-        {/* Previous dispatch batches */}
-        {(() => {
-          const batches = (po as PurchaseOrder & { dispatch_batches?: Array<{ id: string; batch_number: number; dispatched_at: string; notes: string | null }> }).dispatch_batches ?? []
-          if (batches.length === 0) return null
-          return (
+        {/* ---- Previous Dispatch Batches ---- */}
+        {batches.length > 0 && (
           <div className="card no-print">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Previous Dispatch Batches</h3></div>
-            <div className="card-body">
-              {batches.map(batch => (
-                <div key={batch.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                  <div>
-                    <p className="font-medium text-sm">Batch #{batch.batch_number}</p>
-                    <p className="text-xs text-gray-500">{formatDate(batch.dispatched_at)}</p>
-                    {batch.notes && <p className="text-xs text-gray-400">{batch.notes}</p>}
+            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Dispatch Batches</h3></div>
+            <div className="card-body divide-y divide-gray-100">
+              {batches.map(batch => {
+                const ci = batch.commercial_invoices?.[0]
+                const ti = batch.tax_invoices?.[0]
+                const pl = batch.packing_lists?.[0]
+                return (
+                  <div key={batch.id} className="py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-medium text-sm">Batch #{batch.batch_number}</p>
+                        <p className="text-xs text-gray-500">{formatDate(batch.dispatched_at)}</p>
+                        {batch.notes && <p className="text-xs text-gray-400 mt-0.5">{batch.notes}</p>}
+                      </div>
+                      <div className="flex gap-2 flex-wrap justify-end">
+                        {ci ? (
+                          <Link href={`/commercial-invoices/${ci.id}`} className="btn btn-secondary btn-sm text-xs">
+                            CI {ci.invoice_number}
+                          </Link>
+                        ) : null}
+                        {ti ? (
+                          <Link href={`/tax-invoices/${ti.id}`} className="btn btn-secondary btn-sm text-xs">
+                            TI {ti.tax_invoice_number}
+                          </Link>
+                        ) : null}
+                        {pl ? (
+                          <Link href={`/packing-lists/${pl.id}`} className="btn btn-secondary btn-sm text-xs">
+                            Packing List
+                          </Link>
+                        ) : null}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Link href={`/commercial-invoices?po_id=${po.id}&batch_id=${batch.id}`} className="btn btn-secondary btn-sm text-xs">CI</Link>
-                    <Link href={`/tax-invoices?po_id=${po.id}&batch_id=${batch.id}`} className="btn btn-secondary btn-sm text-xs">TI</Link>
-                    <Link href={`/packing-lists?po_id=${po.id}&batch_id=${batch.id}`} className="btn btn-secondary btn-sm text-xs">PL</Link>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
-          )
-        })()}
+        )}
       </div>
     </PageWrapper>
   )
