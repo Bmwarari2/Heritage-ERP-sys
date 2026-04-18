@@ -337,11 +337,14 @@ export default function PODetailPage() {
         )}
 
         {/* Previous dispatch batches */}
-        {(po as PurchaseOrder & { dispatch_batches?: Array<{ id: string; batch_number: number; dispatched_at: string; notes: string | null }> }).dispatch_batches?.length > 0 && (
+        {(() => {
+          const batches = (po as PurchaseOrder & { dispatch_batches?: Array<{ id: string; batch_number: number; dispatched_at: string; notes: string | null }> }).dispatch_batches ?? []
+          if (batches.length === 0) return null
+          return (
           <div className="card no-print">
             <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Previous Dispatch Batches</h3></div>
             <div className="card-body">
-              {(po as PurchaseOrder & { dispatch_batches?: Array<{ id: string; batch_number: number; dispatched_at: string; notes: string | null }> }).dispatch_batches!.map(batch => (
+              {batches.map(batch => (
                 <div key={batch.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
                   <div>
                     <p className="font-medium text-sm">Batch #{batch.batch_number}</p>
@@ -357,7 +360,8 @@ export default function PODetailPage() {
               ))}
             </div>
           </div>
-        )}
+          )
+        })()}
       </div>
     </PageWrapper>
   )
