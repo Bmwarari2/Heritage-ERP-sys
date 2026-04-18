@@ -16,7 +16,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   const supabase = createServerClient()
   const body = await request.json()
   const { items, boxes, ...plData } = body
-  const { data, error } = await supabase.from('packing_lists').update(plData).eq('id', params.id).select().single()
+  const { error } = await supabase.from('packing_lists').update(plData).eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (items) {
     await supabase.from('packing_list_items').delete().eq('packing_list_id', params.id)
@@ -34,7 +34,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       )
     }
   }
-  return NextResponse.json(data)
+  // Re-fetch with nested records so the client has the full document immediately
+  const { data: full, error: fetchErr } = await supabase
+    .from('packing_lists').select('*, packing_list_items(*), packing_list_boxes(*)').eq('id', params.id).single()
+  if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 })
+  return NextResponse.json(full)
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {

@@ -207,6 +207,8 @@ export default function PODetailPage() {
                         <th>Delivery</th>
                         <th className="text-right">Net Price</th>
                         <th className="text-right">Net Amount</th>
+                        <th className="no-print">Link</th>
+                        <th className="no-print">Notes</th>
                       </>
                     ) : (
                       <>
@@ -215,6 +217,8 @@ export default function PODetailPage() {
                         <th>Unit</th>
                         <th className="text-right">Unit Price</th>
                         <th className="text-right">Total</th>
+                        <th className="no-print">Link</th>
+                        <th className="no-print">Notes</th>
                       </>
                     )}
                     {/* Dispatch cols — screen only */}
@@ -244,6 +248,10 @@ export default function PODetailPage() {
                             <td>{formatDate(item.delivery_date)}</td>
                             <td className="text-right">{item.net_price.toFixed(2)}</td>
                             <td className="text-right font-medium">{item.net_amount.toFixed(2)}</td>
+                            <td className="no-print text-xs">
+                              {item.product_url && <a href={item.product_url} target="_blank" rel="noreferrer" className="text-blue-500 underline truncate block max-w-[120px]">Link</a>}
+                            </td>
+                            <td className="no-print text-xs text-gray-500">{item.vendor_notes}</td>
                           </>
                         ) : (
                           <>
@@ -252,6 +260,10 @@ export default function PODetailPage() {
                             <td>{item.unit}</td>
                             <td className="text-right">{item.unit_price.toFixed(2)}</td>
                             <td className="text-right font-medium">{item.total_price.toFixed(2)}</td>
+                            <td className="no-print text-xs">
+                              {item.product_url && <a href={item.product_url} target="_blank" rel="noreferrer" className="text-blue-500 underline truncate block max-w-[120px]">Link</a>}
+                            </td>
+                            <td className="no-print text-xs text-gray-500">{item.vendor_notes}</td>
                           </>
                         )}
                         {/* Dispatch controls — screen only */}
