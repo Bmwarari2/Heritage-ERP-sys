@@ -3,6 +3,27 @@ import type { ParsedRFQ, ParsedPO } from '@/types'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+// Extract JSON object from Claude's response and fix common escaping issues
+// (e.g. literal newlines/tabs inside string values that Claude leaves unescaped).
+function extractAndParseJson<T>(responseText: string): T {
+  const start = responseText.indexOf('{')
+  const end = responseText.lastIndexOf('}')
+  if (start === -1 || end === -1) throw new Error('No JSON object found in Claude response')
+
+  let jsonStr = responseText.slice(start, end + 1)
+
+  try {
+    return JSON.parse(jsonStr) as T
+  } catch {
+    // Fix literal control characters that appear inside JSON string values.
+    // The regex matches each quoted JSON string; we sanitize only within it.
+    jsonStr = jsonStr.replace(/"(?:[^"\\]|\\.)*"/g, match =>
+      match.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')
+    )
+    return JSON.parse(jsonStr) as T
+  }
+}
+
 // ============================================================
 // RFQ PARSING
 // ============================================================
@@ -71,7 +92,7 @@ ${pdfText}`
 
   const message = await client.messages.create({
     model: 'claude-opus-4-7',
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [{ role: 'user', content: userPrompt }],
     system: systemPrompt,
   })
@@ -79,12 +100,7 @@ ${pdfText}`
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Unexpected response type from Claude')
 
-  // Extract JSON from the response
-  const text = content.text.trim()
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('No JSON found in Claude response')
-
-  return JSON.parse(jsonMatch[0]) as ParsedRFQ
+  return extractAndParseJson<ParsedRFQ>(content.text)
 }
 
 // ============================================================
@@ -163,7 +179,7 @@ ${pdfText}`
 
   const message = await client.messages.create({
     model: 'claude-opus-4-7',
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [{ role: 'user', content: userPrompt }],
     system: systemPrompt,
   })
@@ -171,9 +187,5 @@ ${pdfText}`
   const content = message.content[0]
   if (content.type !== 'text') throw new Error('Unexpected response type from Claude')
 
-  const text = content.text.trim()
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('No JSON found in Claude response')
-
-  return JSON.parse(jsonMatch[0]) as ParsedPO
+  return extractAndParseJson<ParsedPO>(content.text)
 }
