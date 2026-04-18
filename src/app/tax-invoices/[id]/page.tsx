@@ -135,7 +135,7 @@ function TIContent() {
           {/* Bill To */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
-              <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Bill To</h3></div>
+              <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Bill To</h3></div>
               <div className="card-body space-y-3">
                 <div><label className="form-label">Customer Name</label><input className="form-input" value={form.customer_name} onChange={e => setField('customer_name', e.target.value)} /></div>
                 <div><label className="form-label">Customer ID</label><input className="form-input" value={form.customer_id} onChange={e => setField('customer_id', e.target.value)} /></div>
@@ -144,7 +144,7 @@ function TIContent() {
               </div>
             </div>
             <div className="card">
-              <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Payment & Order Details</h3></div>
+              <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Payment & Order Details</h3></div>
               <div className="card-body space-y-3">
                 <div><label className="form-label">Invoice Date</label><input type="date" className="form-input" value={form.invoice_date} onChange={e => setField('invoice_date', e.target.value)} /></div>
                 <div><label className="form-label">Payment Due Date</label><input type="date" className="form-input" value={form.payment_due_date} onChange={e => setField('payment_due_date', e.target.value)} /></div>
@@ -164,7 +164,7 @@ function TIContent() {
           {/* Items */}
           <div className="card">
             <div className="card-header">
-              <h3 className="font-semibold text-[#1a2744]">Items</h3>
+              <h3 className="font-semibold text-[#1E3A5F]">Items</h3>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setItems(i => [...i, { item_number: String(i.length + 1), item_description: '', quantity: 1, unit_price: 0 }])}>
                 <Plus className="w-4 h-4" /> Add
               </button>
@@ -192,13 +192,13 @@ function TIContent() {
                   <input type="number" className="form-input w-20 text-right py-1" value={form.sales_tax_rate} onChange={e => setField('sales_tax_rate', e.target.value)} />
                 </div>
                 <div className="flex justify-between"><span>Tax Amount</span><span>{form.currency} {taxAmount.toFixed(2)}</span></div>
-                <div className="flex justify-between font-bold border-t border-gray-200 pt-2"><span>Total</span><span className="text-[#1a2744]">{form.currency} {total.toFixed(2)}</span></div>
+                <div className="flex justify-between font-bold border-t border-gray-200 pt-2"><span>Total</span><span className="text-[#1E3A5F]">{form.currency} {total.toFixed(2)}</span></div>
               </div>
             </div>
           </div>
           {/* Bank Details */}
           <div className="card">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Payment Details (Bank)</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Payment Details (Bank)</h3></div>
             <div className="card-body grid grid-cols-2 md:grid-cols-3 gap-4">
               <div><label className="form-label">Bank Name</label><input className="form-input" value={form.bank_name} onChange={e => setField('bank_name', e.target.value)} /></div>
               <div><label className="form-label">Account Name</label><input className="form-input" value={form.bank_account_name} onChange={e => setField('bank_account_name', e.target.value)} /></div>
@@ -279,7 +279,7 @@ function TIContent() {
           <div className="w-64 space-y-1 text-sm">
             <div className="flex justify-between"><span>Sub Total</span><span>{ti.currency} {tiSubtotal.toFixed(2)}</span></div>
             {tiTax > 0 && <div className="flex justify-between"><span>Sales Tax ({ti.sales_tax_rate}%)</span><span>{ti.currency} {tiTax.toFixed(2)}</span></div>}
-            <div className="flex justify-between font-bold border-t border-gray-200 pt-2"><span>Total</span><span className="text-[#1a2744]">{formatCurrency(tiTotal, ti.currency)}</span></div>
+            <div className="flex justify-between font-bold border-t border-gray-200 pt-2"><span>Total</span><span className="text-[#1E3A5F]">{formatCurrency(tiTotal, ti.currency)}</span></div>
           </div>
         </div>
         {/* Bank Details */}

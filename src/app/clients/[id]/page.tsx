@@ -79,7 +79,7 @@ export default function ClientDetailPage() {
         <form onSubmit={handleSave} className="space-y-6 w-full">
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
           <div className="card">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Client Details</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Client Details</h3></div>
             <div className="card-body space-y-4">
               <div>
                 <label className="form-label">Company / Client Name *</label>
@@ -147,11 +147,11 @@ export default function ClientDetailPage() {
         <div className="card">
           <div className="card-header">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#1a2744] flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-[#c8a84b]" />
+              <div className="w-10 h-10 rounded-lg bg-[#1E3A5F] flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-[#3A6EA5]" />
               </div>
               <div>
-                <h2 className="font-bold text-[#1a2744]">{client.name}</h2>
+                <h2 className="font-bold text-[#1E3A5F]">{client.name}</h2>
                 {client.contact_person && <p className="text-sm text-gray-500">{client.contact_person}</p>}
               </div>
             </div>
@@ -160,7 +160,7 @@ export default function ClientDetailPage() {
             {client.email && (
               <div className="flex items-center gap-2 text-gray-700">
                 <Mail className="w-4 h-4 text-gray-400" />
-                <a href={`mailto:${client.email}`} className="hover:text-[#1a2744]">{client.email}</a>
+                <a href={`mailto:${client.email}`} className="hover:text-[#1E3A5F]">{client.email}</a>
               </div>
             )}
             {client.phone && (
@@ -197,26 +197,26 @@ export default function ClientDetailPage() {
 
         {/* Quick actions to create linked documents */}
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Create Document for this Client</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Create Document for this Client</h3></div>
           <div className="card-body grid grid-cols-2 sm:grid-cols-4 gap-3">
             <Link href={`/rfq/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
-              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#c8a84b] hover:bg-amber-50 transition-colors text-center">
-              <FileText className="w-6 h-6 text-[#1a2744]" />
+              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
+              <FileText className="w-6 h-6 text-[#1E3A5F]" />
               <span className="text-xs font-medium text-gray-700">New RFQ</span>
             </Link>
             <Link href={`/proforma/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
-              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#c8a84b] hover:bg-amber-50 transition-colors text-center">
-              <FileText className="w-6 h-6 text-[#c8a84b]" />
+              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
+              <FileText className="w-6 h-6 text-[#3A6EA5]" />
               <span className="text-xs font-medium text-gray-700">New Proforma</span>
             </Link>
             <Link href={`/purchase-orders/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
-              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#c8a84b] hover:bg-amber-50 transition-colors text-center">
-              <ShoppingCart className="w-6 h-6 text-[#1a2744]" />
+              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
+              <ShoppingCart className="w-6 h-6 text-[#1E3A5F]" />
               <span className="text-xs font-medium text-gray-700">New PO</span>
             </Link>
             <Link href={`/commercial-invoices/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
-              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#c8a84b] hover:bg-amber-50 transition-colors text-center">
-              <Receipt className="w-6 h-6 text-[#1a2744]" />
+              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
+              <Receipt className="w-6 h-6 text-[#1E3A5F]" />
               <span className="text-xs font-medium text-gray-700">New CI</span>
             </Link>
           </div>

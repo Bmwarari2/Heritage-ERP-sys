@@ -61,7 +61,7 @@ export default function POListPage() {
             <tbody>
               {pos.map(po => (
                 <tr key={po.id}>
-                  <td className="font-mono font-medium text-[#1a2744]">{po.po_number}</td>
+                  <td className="font-mono font-medium text-[#1E3A5F]">{po.po_number}</td>
                   <td>
                     <span className={`badge text-xs ${po.po_type === 'standalone' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
                       {po.po_type}

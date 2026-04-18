@@ -57,13 +57,13 @@ export default function ClientsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {clients.map(c => (
-              <Link key={c.id} href={`/clients/${c.id}`} className="card card-body hover:border-[#c8a84b] transition-colors group">
+              <Link key={c.id} href={`/clients/${c.id}`} className="card card-body hover:border-[#3A6EA5] transition-colors group">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#1a2744] flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-5 h-5 text-[#c8a84b]" />
+                  <div className="w-10 h-10 rounded-lg bg-[#1E3A5F] flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-5 h-5 text-[#3A6EA5]" />
                   </div>
                 </div>
-                <h3 className="font-semibold text-[#1a2744] group-hover:text-[#c8a84b] transition-colors">{c.name}</h3>
+                <h3 className="font-semibold text-[#1E3A5F] group-hover:text-[#3A6EA5] transition-colors">{c.name}</h3>
                 {c.contact_person && <p className="text-sm text-gray-500 mt-0.5">{c.contact_person}</p>}
                 <div className="mt-3 space-y-1">
                   {c.email && (

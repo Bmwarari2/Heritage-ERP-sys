@@ -2,121 +2,219 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =========================================================
+   DESIGN TOKENS — Heritage Global Solutions
+   Palette sampled from the shield & wordmark in the logo.
+   ========================================================= */
 @layer base {
   :root {
-    --navy: #1a2744;
-    --gold: #c8a84b;
+    /* Brand */
+    --heritage-50:  #F3F7FB;
+    --heritage-100: #E4EEF7;
+    --heritage-200: #C7DCEC;
+    --heritage-300: #9FC1DC;
+    --heritage-400: #6FA0C6;
+    --heritage-500: #4A82B0;
+    --heritage-600: #3A6EA5; /* primary */
+    --heritage-700: #2F5F8F;
+    --heritage-800: #264D74;
+    --heritage-900: #1E3A5F;
+
+    /* Slate (from dark side of shield) */
+    --slate-500: #5C6772;
+    --slate-700: #3A4350;
+    --slate-900: #232931;
+
+    /* Semantic surface tokens */
+    --surface-0: #FFFFFF;
+    --surface-1: #F7F9FC;
+    --surface-2: #EEF2F8;
+    --border-subtle: #E5EBF2;
+
+    /* Legacy aliases — preserved so any existing inline hex refs keep rendering the new palette */
+    --navy: #1E3A5F;
+    --gold: #3A6EA5;
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply text-slate-900;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(58, 110, 165, 0.05), transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(30, 58, 95, 0.04), transparent 45%),
+      #F7F9FC;
+    min-height: 100vh;
   }
+
+  /* Smooth focus ring for keyboard users */
+  :focus-visible {
+    outline: 2px solid var(--heritage-600);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3, h4 { letter-spacing: -0.01em; }
 }
 
+/* =========================================================
+   COMPONENTS
+   ========================================================= */
 @layer components {
   /* ---- Form elements ---- */
   .form-label {
-    @apply block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1;
+    @apply block text-[11px] font-semibold text-slate-600 uppercase tracking-[0.08em] mb-1.5;
   }
 
   .form-input {
-    @apply w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm
-           focus:outline-none focus:ring-2 focus:ring-[#1a2744] focus:border-transparent
-           placeholder:text-gray-400 transition-colors;
+    @apply w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900
+           shadow-[inset_0_1px_2px_0_rgba(17,24,39,0.03)]
+           placeholder:text-slate-400
+           transition-all duration-150
+           focus:outline-none focus:border-[var(--heritage-600)]
+           focus:ring-4 focus:ring-[var(--heritage-200)]/50
+           hover:border-slate-300
+           disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed;
   }
 
   .form-select {
-    @apply form-input appearance-none cursor-pointer;
+    @apply form-input appearance-none cursor-pointer pr-10;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%235C6772'><path d='M5.5 8l4.5 4.5L14.5 8z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.625rem center;
+    background-size: 1.1rem;
   }
 
   .form-textarea {
-    @apply form-input resize-y min-h-[80px];
+    @apply form-input resize-y min-h-[84px] leading-relaxed;
   }
+
+  .form-hint     { @apply text-xs text-slate-500 mt-1; }
+  .form-error    { @apply text-xs text-red-600 mt-1; }
 
   /* ---- Buttons ---- */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
-           transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold
+           transition-all duration-150
+           focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--heritage-200)]/60
+           disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap
+           active:translate-y-px select-none;
   }
 
   .btn-primary {
-    @apply btn bg-[#1a2744] text-white hover:bg-[#243561] focus:ring-[#1a2744];
+    background-image: linear-gradient(180deg, var(--heritage-600) 0%, var(--heritage-700) 100%);
+    @apply text-white shadow-soft hover:brightness-110;
   }
 
   .btn-secondary {
-    @apply btn bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-gray-300;
+    @apply bg-white text-slate-700 border border-slate-200 shadow-soft hover:border-[var(--heritage-400)] hover:text-[var(--heritage-700)] hover:bg-[var(--heritage-50)];
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-none;
   }
 
   .btn-gold {
-    @apply btn bg-[#c8a84b] text-white hover:bg-[#b5943a] focus:ring-[#c8a84b];
+    background-image: linear-gradient(180deg, var(--heritage-500) 0%, var(--heritage-700) 100%);
+    @apply text-white shadow-soft hover:brightness-110;
   }
 
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+    @apply bg-red-600 text-white hover:bg-red-700 shadow-soft;
   }
 
-  .btn-sm {
-    @apply px-3 py-1.5 text-xs;
-  }
-
-  .btn-lg {
-    @apply px-6 py-3 text-base;
-  }
+  .btn-sm { @apply px-3 py-1.5 text-xs rounded-md; }
+  .btn-lg { @apply px-6 py-3 text-base; }
+  .btn-icon { @apply p-2 rounded-lg; }
 
   /* ---- Cards ---- */
   .card {
-    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    @apply bg-white rounded-xl border border-slate-200/80 shadow-card transition-shadow;
+  }
+
+  .card:hover { @apply shadow-lifted; }
+
+  .card-flat {
+    @apply bg-white rounded-xl border border-slate-200/80 shadow-soft;
   }
 
   .card-header {
-    @apply px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2;
+    @apply px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3;
   }
 
-  .card-body {
-    @apply p-4 sm:p-6;
+  .card-header h3 {
+    @apply text-sm font-bold text-[var(--heritage-900)] tracking-tight;
   }
 
-  /* ---- Tables — always scrollable on small screens ---- */
+  .card-body { @apply p-5 sm:p-6; }
+
+  /* ---- Tables ---- */
   .table-wrap {
-    @apply overflow-x-auto -mx-4 sm:-mx-6 px-4 sm:px-6;
+    @apply overflow-x-auto -mx-5 sm:-mx-6 px-5 sm:px-6;
   }
 
   .data-table {
-    @apply w-full text-sm text-left;
+    @apply w-full text-sm text-left border-separate border-spacing-0;
   }
 
   .data-table thead tr {
-    @apply bg-gray-50 border-b border-gray-200;
+    @apply bg-slate-50;
   }
 
   .data-table thead th {
-    @apply px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap;
+    @apply px-4 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-[0.08em] whitespace-nowrap
+           border-b border-slate-200 first:rounded-tl-lg last:rounded-tr-lg;
   }
 
   .data-table tbody tr {
-    @apply border-b border-gray-100 hover:bg-gray-50 transition-colors;
+    @apply hover:bg-[var(--heritage-50)]/60 transition-colors;
   }
 
   .data-table tbody td {
-    @apply px-4 py-3 text-gray-700;
+    @apply px-4 py-3 text-slate-700 border-b border-slate-100;
   }
+
+  .data-table tbody tr:last-child td { @apply border-b-0; }
 
   /* ---- Status badges ---- */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide;
+  }
+
+  .badge::before {
+    content: '';
+    @apply w-1.5 h-1.5 rounded-full bg-current opacity-70;
   }
 
   /* ---- Section dividers ---- */
   .section-title {
-    @apply text-sm font-bold text-[#1a2744] uppercase tracking-widest mb-3 pb-1 border-b-2 border-[#c8a84b];
+    @apply text-[11px] font-bold text-[var(--heritage-800)] uppercase tracking-[0.14em] mb-3 pb-1.5
+           border-b-2 border-[var(--heritage-600)] inline-block min-w-[120px];
+  }
+
+  /* ---- Pill / chip ---- */
+  .chip {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full
+           bg-slate-100 text-slate-700 border border-slate-200;
+  }
+
+  /* ---- Tooltip-like field row label ---- */
+  .kv { @apply grid grid-cols-[auto,1fr] gap-x-2 text-sm; }
+  .kv dt { @apply text-slate-500 font-medium; }
+  .kv dd { @apply text-slate-900 font-semibold; }
+
+  /* ---- Empty state ---- */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-12 px-6 text-center;
   }
 }
 
-/* ---- Hide number input spinners ---- */
+/* =========================================================
+   MISC UTILITIES
+   ========================================================= */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -127,7 +225,21 @@ input[type=number] {
   appearance: textfield;
 }
 
-/* ---- Print styles ---- */
+/* Scrollbar polish (webkit) */
+.scroll-subtle::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-subtle::-webkit-scrollbar-thumb {
+  background: rgba(58, 110, 165, 0.25);
+  border-radius: 999px;
+}
+.scroll-subtle::-webkit-scrollbar-track { background: transparent; }
+
+/* =========================================================
+   PRINT / PDF EXPORT — LANDSCAPE A4
+   - Landscape orientation for more columns per page
+   - Hides navigation chrome
+   - Places the Heritage logo top-right on every page
+   - Places the shield watermark in the centre of every page
+   ========================================================= */
 @media print {
   /* Hide all navigation chrome */
   .no-print,
@@ -136,37 +248,76 @@ input[type=number] {
     display: none !important;
   }
 
-  .print-only {
-    display: block !important;
-  }
+  .print-only { display: block !important; }
 
   body {
-    background: white;
+    background: white !important;
     color: black;
-    font-size: 11px;
-    font-family: Arial, sans-serif;
+    font-size: 10.5px;
+    font-family: 'Inter', Arial, sans-serif;
   }
 
   /* Remove screen-only decorations */
   .card,
+  .card-flat,
   .card-body {
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     border-radius: 0 !important;
+    background: transparent !important;
   }
 
+  /* Table print styling — compact rows, visible borders for scannability */
+  .data-table thead tr { background: #EEF2F8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .data-table thead th,
+  .data-table tbody td { border: 1px solid #D6DEE8 !important; padding: 6px 8px !important; }
+  .data-table { border-spacing: 0 !important; }
+
+  /* The print page itself — landscape A4 */
   .print-page {
-    width: 210mm;
-    min-height: 297mm;
-    padding: 15mm 20mm;
+    width: 277mm;            /* 297mm - 2*10mm margins */
+    min-height: 190mm;       /* 210mm - 2*10mm margins */
+    padding: 0 !important;
     margin: 0 auto;
-    background: white;
+    background: white !important;
     page-break-after: always;
+    position: relative;
   }
 
+  /* Centred shield watermark behind content */
+  .print-page::before {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 140mm;
+    height: 150mm;
+    transform: translate(-50%, -50%);
+    background: url('/watermark.svg') center/contain no-repeat;
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Everything on the page sits above the watermark */
+  .print-page > * { position: relative; z-index: 1; }
+
+  /* Force section-title underline colour on print */
+  .section-title {
+    border-bottom-color: #3A6EA5 !important;
+    color: #1E3A5F !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Keep table headers repeating on each printed page */
+  .data-table thead { display: table-header-group; }
+  tr, td, th { page-break-inside: avoid; }
+
+  /* Landscape A4 with thin margins to maximise usable area */
   @page {
-    size: A4;
-    margin: 15mm 20mm;
+    size: A4 landscape;
+    margin: 10mm 10mm;
   }
 }

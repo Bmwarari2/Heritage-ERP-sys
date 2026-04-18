@@ -148,7 +148,7 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
       {/* ---- Document Info ---- */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-[#1a2744]">Document Information</h3>
+          <h3 className="font-semibold text-[#1E3A5F]">Document Information</h3>
         </div>
         <div className="card-body grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
@@ -190,7 +190,7 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
       {/* ---- Invoicing / Buyer Details ---- */}
       <div className="grid md:grid-cols-2 gap-6">
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Invoicing Details (Buyer)</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Invoicing Details (Buyer)</h3></div>
           <div className="card-body space-y-3">
             <div>
               <label className="form-label">Company Name</label>
@@ -218,7 +218,7 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
         </div>
 
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Delivery Address</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Delivery Address</h3></div>
           <div className="card-body space-y-3">
             <div>
               <label className="form-label">Company</label>
@@ -251,7 +251,7 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
       {/* ---- Contact Details ---- */}
       <div className="grid md:grid-cols-2 gap-6">
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Buyer Contact Details</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Buyer Contact Details</h3></div>
           <div className="card-body space-y-3">
             <div>
               <label className="form-label">Contact Person</label>
@@ -275,7 +275,7 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
         </div>
 
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Vendor Address Details (Heritage)</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Vendor Address Details (Heritage)</h3></div>
           <div className="card-body space-y-3">
             <div>
               <label className="form-label">Vendor Name</label>
@@ -326,7 +326,7 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
       {/* ---- Line Items ---- */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-[#1a2744]">Line Items</h3>
+          <h3 className="font-semibold text-[#1E3A5F]">Line Items</h3>
           <button type="button" className="btn btn-secondary btn-sm" onClick={addItem}>
             <Plus className="w-4 h-4" /> Add Item
           </button>

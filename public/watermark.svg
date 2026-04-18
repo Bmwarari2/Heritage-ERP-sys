@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 160" role="img" aria-label="Heritage watermark">
+  <g opacity="0.08">
+    <path d="M5 5 H145 V95 Q145 130 75 155 Q5 130 5 95 Z"
+          fill="#D8E4F0" stroke="#3A6EA5" stroke-width="3"/>
+    <path d="M8 8 H75 V153 Q8 130 8 95 Z" fill="#C8DBEC"/>
+    <path d="M75 8 H142 V95 Q142 130 75 153 Z" fill="#B8C6D4"/>
+    <path d="M40 32 C 40 32, 55 23, 63 29
+             C 71 35, 61 54, 65 73
+             C 69 90, 87 97, 97 86
+             C 107 75, 100 60, 85 62
+             C 70 64, 60 81, 64 104
+             C 67 124, 82 134, 97 127"
+          fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

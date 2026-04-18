@@ -132,7 +132,7 @@ export default function ProformaDetailPage() {
             )}
             <div className="flex justify-between font-bold text-base border-t border-gray-300 pt-2">
               <span>Total</span>
-              <span className="text-[#1a2744]">{formatCurrency(pi.total_amount, pi.currency)}</span>
+              <span className="text-[#1E3A5F]">{formatCurrency(pi.total_amount, pi.currency)}</span>
             </div>
           </div>
         </div>

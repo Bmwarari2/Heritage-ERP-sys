@@ -76,9 +76,9 @@ export default function RFQUploader() {
     return (
       <div className="card card-body flex flex-col items-center justify-center py-20 gap-4">
         <div className="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-[#1a2744] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-[#1E3A5F] border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="text-lg font-semibold text-[#1a2744]">Parsing PDF with AI…</p>
+        <p className="text-lg font-semibold text-[#1E3A5F]">Parsing PDF with AI…</p>
         <p className="text-sm text-gray-500">Claude is extracting RFQ data from your document</p>
       </div>
     )
@@ -93,7 +93,7 @@ export default function RFQUploader() {
         </div>
       )}
       <div
-        className="card card-body border-2 border-dashed border-gray-300 hover:border-[#c8a84b] transition-colors cursor-pointer text-center py-16"
+        className="card card-body border-2 border-dashed border-gray-300 hover:border-[#3A6EA5] transition-colors cursor-pointer text-center py-16"
         onDrop={handleDrop}
         onDragOver={e => e.preventDefault()}
         onClick={() => inputRef.current?.click()}

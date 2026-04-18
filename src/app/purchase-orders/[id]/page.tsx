@@ -380,7 +380,7 @@ export default function PODetailPage() {
               {po.customs_duties_percent > 0 && <div className="flex justify-between"><span className="text-gray-600">Duties ({po.customs_duties_percent}%)</span><span>{formatCurrency(po.customs_duties_amount, po.currency)}</span></div>}
               <div className="flex justify-between font-bold border-t border-gray-200 pt-2">
                 <span>Total Amount</span>
-                <span className="text-[#1a2744]">{formatCurrency(po.total_amount || po.purchase_total, po.currency)}</span>
+                <span className="text-[#1E3A5F]">{formatCurrency(po.total_amount || po.purchase_total, po.currency)}</span>
               </div>
             </div>
           </div>
@@ -404,8 +404,8 @@ export default function PODetailPage() {
           <div className="card no-print">
             <div className="card-header">
               <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-[#c8a84b]" />
-                <h3 className="font-semibold text-[#1a2744]">Dispatch &amp; Create Documents</h3>
+                <Package className="w-5 h-5 text-[#3A6EA5]" />
+                <h3 className="font-semibold text-[#1E3A5F]">Dispatch &amp; Create Documents</h3>
               </div>
             </div>
             <div className="card-body">
@@ -446,7 +446,7 @@ export default function PODetailPage() {
         {/* ---- Previous Dispatch Batches ---- */}
         {batches.length > 0 && (
           <div className="card no-print">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Dispatch Batches</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Dispatch Batches</h3></div>
             <div className="card-body divide-y divide-gray-100">
               {batches.map(batch => {
                 const ci = batch.commercial_invoices?.[0]

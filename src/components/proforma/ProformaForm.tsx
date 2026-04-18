@@ -194,7 +194,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
 
       {/* Invoice Details */}
       <div className="card">
-        <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Invoice Details</h3></div>
+        <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Invoice Details</h3></div>
         <div className="card-body grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           <div>
             <label className="form-label">Invoice Date</label>
@@ -235,7 +235,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
       {/* Sent To */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Sent To (Client)</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Sent To (Client)</h3></div>
           <div className="card-body space-y-3">
             {clients.length > 0 && (
               <div>
@@ -278,7 +278,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
         </div>
 
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Vendor (Heritage)</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Vendor (Heritage)</h3></div>
           <div className="card-body space-y-3">
             <div>
               <label className="form-label">Vendor Name</label>
@@ -295,7 +295,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
       {/* Line Items */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-[#1a2744]">Line Items</h3>
+          <h3 className="font-semibold text-[#1E3A5F]">Line Items</h3>
           <button type="button" className="btn btn-secondary btn-sm" onClick={addItem}>
             <Plus className="w-4 h-4" /> Add Item
           </button>
@@ -333,7 +333,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
                     <td><input type="number" className="form-input text-right" value={item.quantity} min={0} step={0.001} onChange={e => setItemField(i, 'quantity', parseFloat(e.target.value) || 0)} /></td>
                     <td><input className="form-input" value={item.unit} onChange={e => setItemField(i, 'unit', e.target.value)} /></td>
                     <td><input type="number" className="form-input text-right" value={item.unit_price} min={0} step={0.01} onChange={e => setItemField(i, 'unit_price', parseFloat(e.target.value) || 0)} /></td>
-                    <td className="text-right font-medium text-[#1a2744] pr-4">
+                    <td className="text-right font-medium text-[#1E3A5F] pr-4">
                       {(item.quantity * item.unit_price).toFixed(2)}
                     </td>
                     <td>
@@ -372,7 +372,7 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
             </div>
             <div className="flex justify-between text-base font-bold border-t border-gray-200 pt-2">
               <span>Total</span>
-              <span className="text-[#1a2744]">{form.currency} {total.toFixed(2)}</span>
+              <span className="text-[#1E3A5F]">{form.currency} {total.toFixed(2)}</span>
             </div>
           </div>
         </div>

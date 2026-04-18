@@ -32,7 +32,7 @@ export default function TaxInvoiceListPage() {
             <tbody>
               {invoices.map(ti => (
                 <tr key={ti.id}>
-                  <td className="font-mono font-medium text-[#1a2744]">{ti.tax_invoice_number}</td>
+                  <td className="font-mono font-medium text-[#1E3A5F]">{ti.tax_invoice_number}</td>
                   <td className="font-mono text-sm">{ti.purchase_order_number ?? '—'}</td>
                   <td>{ti.customer_name ?? '—'}</td>
                   <td>{formatDate(ti.invoice_date)}</td>

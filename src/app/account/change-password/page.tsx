@@ -55,10 +55,10 @@ export default function ChangePasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-xl bg-[#1a2744] flex items-center justify-center mb-3">
-            <Building2 className="w-7 h-7 text-[#c8a84b]" />
+          <div className="w-14 h-14 rounded-xl bg-[#1E3A5F] flex items-center justify-center mb-3">
+            <Building2 className="w-7 h-7 text-[#3A6EA5]" />
           </div>
-          <h1 className="text-2xl font-bold text-[#1a2744]">Set a new password</h1>
+          <h1 className="text-2xl font-bold text-[#1E3A5F]">Set a new password</h1>
           <p className="text-sm text-gray-500 mt-1 text-center">
             You must change your password before using the system.
           </p>
@@ -86,7 +86,7 @@ export default function ChangePasswordPage() {
               autoComplete="current-password"
               value={current}
               onChange={e => setCurrent(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8a84b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3A6EA5]"
             />
           </div>
 
@@ -99,7 +99,7 @@ export default function ChangePasswordPage() {
               autoComplete="new-password"
               value={newPw}
               onChange={e => setNewPw(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8a84b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3A6EA5]"
             />
           </div>
 
@@ -112,14 +112,14 @@ export default function ChangePasswordPage() {
               autoComplete="new-password"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c8a84b]"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3A6EA5]"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading || success}
-            className="w-full py-2.5 bg-[#1a2744] text-white font-semibold rounded-lg hover:bg-[#243561] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full py-2.5 bg-[#1E3A5F] text-white font-semibold rounded-lg hover:bg-[#264D74] transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Updating…' : 'Update password'}

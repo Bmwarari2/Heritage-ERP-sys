@@ -55,7 +55,7 @@ export default function ProformaListPage() {
             <tbody>
               {proformas.map(pi => (
                 <tr key={pi.id}>
-                  <td className="font-mono font-medium text-[#1a2744]">{pi.proforma_number}</td>
+                  <td className="font-mono font-medium text-[#1E3A5F]">{pi.proforma_number}</td>
                   <td className="text-gray-500 text-xs">{(pi.rfqs as { rfq_number?: string } | undefined)?.rfq_number ?? '—'}</td>
                   <td>{pi.client_company ?? '—'}</td>
                   <td>{formatDate(pi.invoice_date)}</td>

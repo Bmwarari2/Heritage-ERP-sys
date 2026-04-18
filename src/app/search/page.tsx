@@ -34,7 +34,7 @@ function Section({ icon: Icon, title, color, children }: {
       <div className="card-header">
         <div className="flex items-center gap-2">
           <Icon className={`w-4 h-4 ${color}`} />
-          <h3 className="font-semibold text-[#1a2744]">{title}</h3>
+          <h3 className="font-semibold text-[#1E3A5F]">{title}</h3>
         </div>
       </div>
       <div className="divide-y divide-gray-100">{children}</div>
@@ -49,7 +49,7 @@ function ResultRow({ href, primary, secondary, badge }: {
     <Link href={href}
       className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors group">
       <div className="min-w-0">
-        <p className="font-medium text-sm text-[#1a2744] truncate">{primary}</p>
+        <p className="font-medium text-sm text-[#1E3A5F] truncate">{primary}</p>
         {secondary && <p className="text-xs text-gray-500 truncate mt-0.5">{secondary}</p>}
       </div>
       <div className="flex items-center gap-2 ml-4 flex-shrink-0">
@@ -140,7 +140,7 @@ function SearchContent() {
 
             {/* Purchase Orders */}
             {(results.purchase_orders?.length ?? 0) > 0 && (
-              <Section icon={ShoppingCart} title="Purchase Orders" color="text-[#1a2744]">
+              <Section icon={ShoppingCart} title="Purchase Orders" color="text-[#1E3A5F]">
                 {results.purchase_orders!.map(po => (
                   <ResultRow key={po.id} href={`/purchase-orders/${po.id}`}
                     primary={po.po_number}
@@ -188,7 +188,7 @@ function SearchContent() {
 
             {/* Packing Lists */}
             {(results.packing_lists?.length ?? 0) > 0 && (
-              <Section icon={Package} title="Packing Lists" color="text-[#c8a84b]">
+              <Section icon={Package} title="Packing Lists" color="text-[#3A6EA5]">
                 {results.packing_lists!.map(pl => (
                   <ResultRow key={pl.id} href={`/packing-lists/${pl.id}`}
                     primary={pl.customer_po_number ?? pl.our_order_number ?? pl.id.slice(0, 8)}

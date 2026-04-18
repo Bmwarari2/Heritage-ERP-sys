@@ -48,7 +48,7 @@ export default function NewClientPage() {
         {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
 
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Client Details</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Client Details</h3></div>
           <div className="card-body space-y-4">
             <div>
               <label className="form-label">Company / Client Name *</label>

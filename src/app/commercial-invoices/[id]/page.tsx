@@ -124,7 +124,7 @@ function CIContent() {
         </div>}>
         <div className="space-y-6 w-full">
           <div className="card">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Invoice Details</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Invoice Details</h3></div>
             <div className="card-body grid grid-cols-2 md:grid-cols-4 gap-4">
               <div><label className="form-label">PO Number</label><input className="form-input" value={form.purchase_order_number} onChange={e => setField('purchase_order_number', e.target.value)} /></div>
               <div><label className="form-label">Invoice Date</label><input type="date" className="form-input" value={form.invoice_date} onChange={e => setField('invoice_date', e.target.value)} /></div>
@@ -137,14 +137,14 @@ function CIContent() {
           </div>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="card">
-              <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Shipper (Heritage)</h3></div>
+              <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Shipper (Heritage)</h3></div>
               <div className="card-body space-y-3">
                 <div><label className="form-label">Name</label><input className="form-input" value={form.shipper_name} onChange={e => setField('shipper_name', e.target.value)} /></div>
                 <div><label className="form-label">Address</label><textarea className="form-textarea" rows={3} value={form.shipper_address} onChange={e => setField('shipper_address', e.target.value)} /></div>
               </div>
             </div>
             <div className="card">
-              <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Consignee (Client)</h3></div>
+              <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Consignee (Client)</h3></div>
               <div className="card-body space-y-3">
                 <div><label className="form-label">Name</label><input className="form-input" value={form.consignee_name} onChange={e => setField('consignee_name', e.target.value)} /></div>
                 <div><label className="form-label">Address</label><textarea className="form-textarea" rows={2} value={form.consignee_address} onChange={e => setField('consignee_address', e.target.value)} /></div>
@@ -155,7 +155,7 @@ function CIContent() {
           </div>
           <div className="card">
             <div className="card-header">
-              <h3 className="font-semibold text-[#1a2744]">Items</h3>
+              <h3 className="font-semibold text-[#1E3A5F]">Items</h3>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setItems(i => [...i, { item_number: String(i.length + 1), product_description: '', quantity: 1, unit_price: 0 }])}>
                 <Plus className="w-4 h-4" /> Add
               </button>
@@ -178,7 +178,7 @@ function CIContent() {
             <div className="flex justify-end px-6 py-4 border-t border-gray-100">
               <div className="w-48 flex justify-between font-bold">
                 <span>Total</span>
-                <span className="text-[#1a2744]">{form.currency} {totalAmount.toFixed(2)}</span>
+                <span className="text-[#1E3A5F]">{form.currency} {totalAmount.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -244,7 +244,7 @@ function CIContent() {
         <div className="flex justify-end mb-4">
           <div className="w-48 flex justify-between font-bold text-base border-t border-gray-200 pt-2">
             <span>Total Invoice Amount</span>
-            <span className="text-[#1a2744]">{formatCurrency(ci.total_amount, ci.currency)}</span>
+            <span className="text-[#1E3A5F]">{formatCurrency(ci.total_amount, ci.currency)}</span>
           </div>
         </div>
         {ci.notes && <div className="text-sm"><p className="section-title">Notes</p><p>{ci.notes}</p></div>}

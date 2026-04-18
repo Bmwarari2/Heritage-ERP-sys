@@ -32,7 +32,7 @@ export default function CommercialInvoiceListPage() {
             <tbody>
               {invoices.map(ci => (
                 <tr key={ci.id}>
-                  <td className="font-mono font-medium text-[#1a2744]">{ci.invoice_number}</td>
+                  <td className="font-mono font-medium text-[#1E3A5F]">{ci.invoice_number}</td>
                   <td className="font-mono text-sm">{ci.purchase_order_number ?? '—'}</td>
                   <td>{formatDate(ci.invoice_date)}</td>
                   <td>{ci.consignee_name ?? '—'}</td>

@@ -29,22 +29,26 @@ export function formatNumber(n: number | null | undefined, decimals = 2): string
   return n.toFixed(decimals)
 }
 
+/**
+ * Status badge colour map — tuned to the Heritage palette.
+ * Each entry uses tokens that print cleanly and stay legible in landscape PDFs.
+ */
 export const STATUS_COLOURS: Record<string, string> = {
-  draft: 'bg-gray-100 text-gray-700',
-  sent: 'bg-blue-100 text-blue-700',
-  responded: 'bg-purple-100 text-purple-700',
-  accepted: 'bg-green-100 text-green-700',
-  active: 'bg-indigo-100 text-indigo-700',
-  partial: 'bg-amber-100 text-amber-700',
-  complete: 'bg-emerald-100 text-emerald-700',
-  closed: 'bg-gray-200 text-gray-600',
+  draft:     'bg-slate-100 text-slate-700',
+  sent:      'bg-[#E4EEF7] text-[#2F5F8F]',
+  responded: 'bg-[#C7DCEC] text-[#1E3A5F]',
+  accepted:  'bg-emerald-100 text-emerald-700',
+  active:    'bg-[#9FC1DC]/40 text-[#1E3A5F]',
+  partial:   'bg-amber-100 text-amber-800',
+  complete:  'bg-emerald-100 text-emerald-800',
+  closed:    'bg-slate-200 text-slate-600',
   cancelled: 'bg-red-100 text-red-700',
-  issued: 'bg-teal-100 text-teal-700',
-  paid: 'bg-green-100 text-green-800',
+  issued:    'bg-[#E4EEF7] text-[#264D74]',
+  paid:      'bg-emerald-100 text-emerald-800',
 }
 
 export function statusBadge(status: string) {
-  return STATUS_COLOURS[status] ?? 'bg-gray-100 text-gray-600'
+  return STATUS_COLOURS[status] ?? 'bg-slate-100 text-slate-600'
 }
 
 export function generateReference(prefix: string, date = new Date()): string {

@@ -111,7 +111,7 @@ function PLContent() {
         </div>}>
         <div className="space-y-6 w-full">
           <div className="card">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Packing List Details</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Packing List Details</h3></div>
             <div className="card-body grid grid-cols-2 md:grid-cols-3 gap-4">
               <div><label className="form-label">Customer PO Number</label><input className="form-input" value={form.customer_po_number} onChange={e => setField('customer_po_number', e.target.value)} /></div>
               <div><label className="form-label">Our Order No</label><input className="form-input" value={form.our_order_number} onChange={e => setField('our_order_number', e.target.value)} /></div>
@@ -128,7 +128,7 @@ function PLContent() {
           {/* Items */}
           <div className="card">
             <div className="card-header">
-              <h3 className="font-semibold text-[#1a2744]">Items</h3>
+              <h3 className="font-semibold text-[#1E3A5F]">Items</h3>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setItems(i => [...i, { item_number: String(i.length + 1), quantity: 1, description: '' }])}>
                 <Plus className="w-4 h-4" /> Add Item
               </button>
@@ -151,7 +151,7 @@ function PLContent() {
           {/* Boxes */}
           <div className="card">
             <div className="card-header">
-              <h3 className="font-semibold text-[#1a2744]">Box Details</h3>
+              <h3 className="font-semibold text-[#1E3A5F]">Box Details</h3>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setBoxes(b => [...b, { box_number: b.length + 1, box_type: 'Cardboard', dimension_l: 0, dimension_w: 0, dimension_h: 0, gross_weight: 0, notes: '' }])}>
                 <Plus className="w-4 h-4" /> Add Box
               </button>

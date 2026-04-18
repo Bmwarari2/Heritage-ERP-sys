@@ -83,7 +83,7 @@ export default function RFQListPage() {
             <tbody>
               {rfqs.map(rfq => (
                 <tr key={rfq.id}>
-                  <td className="font-mono font-medium text-[#1a2744]">{rfq.rfq_number}</td>
+                  <td className="font-mono font-medium text-[#1E3A5F]">{rfq.rfq_number}</td>
                   <td>{rfq.buyer_company || '—'}</td>
                   <td className="text-gray-500">{rfq.your_reference || '—'}</td>
                   <td>{formatDate(rfq.rfq_date)}</td>

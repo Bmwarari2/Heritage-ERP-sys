@@ -192,7 +192,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
 
       {/* Document Info */}
       <div className="card">
-        <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Purchase Order Information</h3></div>
+        <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Purchase Order Information</h3></div>
         <div className="card-body grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <label className="form-label">PO Number *</label>
@@ -259,7 +259,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
       {poType === 'client' ? (
         <div className="grid md:grid-cols-3 gap-6">
           <div className="card">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Shipping Address</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Shipping Address</h3></div>
             <div className="card-body space-y-3">
               <div><label className="form-label">Company</label><input className="form-input" value={form.ship_to_company} onChange={e => setField('ship_to_company', e.target.value)} /></div>
               <div><label className="form-label">PO Box</label><input className="form-input" value={form.ship_to_po_box} onChange={e => setField('ship_to_po_box', e.target.value)} /></div>
@@ -271,7 +271,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
             </div>
           </div>
           <div className="card">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Vendor Address (Heritage)</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Vendor Address (Heritage)</h3></div>
             <div className="card-body space-y-3">
               <div><label className="form-label">Name</label><input className="form-input" value={form.vendor_name} onChange={e => setField('vendor_name', e.target.value)} /></div>
               <div><label className="form-label">PO Box</label><input className="form-input" value={form.vendor_po_box} onChange={e => setField('vendor_po_box', e.target.value)} /></div>
@@ -288,7 +288,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
             </div>
           </div>
           <div className="card">
-            <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Billing Address</h3></div>
+            <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Billing Address</h3></div>
             <div className="card-body space-y-3">
               <div><label className="form-label">Company</label><input className="form-input" value={form.bill_to_company} onChange={e => setField('bill_to_company', e.target.value)} /></div>
               <div><label className="form-label">Site</label><input className="form-input" value={form.bill_to_site} onChange={e => setField('bill_to_site', e.target.value)} /></div>
@@ -317,7 +317,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
       {/* Line Items */}
       <div className="card">
         <div className="card-header">
-          <h3 className="font-semibold text-[#1a2744]">Items</h3>
+          <h3 className="font-semibold text-[#1E3A5F]">Items</h3>
           <button type="button" className="btn btn-secondary btn-sm" onClick={addItem}><Plus className="w-4 h-4" /> Add Item</button>
         </div>
         <div className="overflow-x-auto">
@@ -393,7 +393,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
           <div className="w-64 text-sm">
             <div className="flex justify-between font-bold text-base border-t border-gray-200 pt-2">
               <span>Purchase Total</span>
-              <span className="text-[#1a2744]">{form.currency} {purchaseTotal.toFixed(2)}</span>
+              <span className="text-[#1E3A5F]">{form.currency} {purchaseTotal.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -402,7 +402,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
       {/* Financial summary (client PO) */}
       {poType === 'client' && (
         <div className="card">
-          <div className="card-header"><h3 className="font-semibold text-[#1a2744]">Financial Summary</h3></div>
+          <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Financial Summary</h3></div>
           <div className="card-body grid grid-cols-2 md:grid-cols-5 gap-4">
             <div><label className="form-label">Net Value</label><input type="number" className="form-input text-right" value={form.net_value} onChange={e => setField('net_value', parseFloat(e.target.value) || 0)} /></div>
             <div><label className="form-label">Gross Price</label><input type="number" className="form-input text-right" value={form.gross_price} onChange={e => setField('gross_price', parseFloat(e.target.value) || 0)} /></div>
