@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 /**
  * GET /api/dispatch-batches/[id]
@@ -7,7 +7,10 @@ import { createServerClient } from '@/lib/supabase'
  * Used by CI/TI/PL "new" pages to pre-populate items from a dispatch.
  */
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   const { data, error } = await supabase
     .from('dispatch_batches')
     .select('*, dispatch_batch_items(*, po_items(*)), purchase_orders(*)')

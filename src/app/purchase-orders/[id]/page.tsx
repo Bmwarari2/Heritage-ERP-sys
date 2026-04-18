@@ -428,7 +428,7 @@ export default function PODetailPage() {
                   onClick={() => createDispatch('tax-invoices')}>
                   Tax Invoice
                 </button>
-                <button className="btn btn-gold" disabled={!hasReadyItems || dispatching}
+                <button className="btn btn-primary" disabled={!hasReadyItems || dispatching}
                   onClick={() => createDispatch('packing-lists')}>
                   Packing List
                 </button>

@@ -83,14 +83,17 @@ export default function Sidebar() {
 
       {/* Search */}
       <div className="px-4 pt-4 pb-2">
-        <form onSubmit={handleSearch}>
+        <form onSubmit={handleSearch} role="search">
+          <label htmlFor="sidebar-search" className="sr-only">Search documents</label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
             <input
-              type="text"
+              id="sidebar-search"
+              type="search"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search documents…"
+              aria-label="Search documents"
               className="w-full pl-10 pr-3 py-2 bg-white/10 border border-white/10 rounded-lg text-sm text-white placeholder-white/45 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/15 transition"
             />
           </div>

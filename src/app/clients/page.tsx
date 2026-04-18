@@ -59,8 +59,8 @@ export default function ClientsPage() {
             {clients.map(c => (
               <Link key={c.id} href={`/clients/${c.id}`} className="card card-body hover:border-[#3A6EA5] transition-colors group">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-[#1E3A5F] flex items-center justify-center flex-shrink-0">
-                    <Building2 className="w-5 h-5 text-[#3A6EA5]" />
+                  <div className="w-10 h-10 rounded-lg bg-[var(--heritage-900)] flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-5 h-5 text-white" />
                   </div>
                 </div>
                 <h3 className="font-semibold text-[#1E3A5F] group-hover:text-[#3A6EA5] transition-colors">{c.name}</h3>

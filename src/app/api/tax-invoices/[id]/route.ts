@@ -1,35 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { parse, tiUpdateSchema, stripManagedFields } from '@/lib/validation'
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerClient()
-  const { data, error } = await supabase.from('tax_invoices').select('*, ti_items(*)').eq('id', params.id).single()
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  const { data, error } = await supabase
+    .from('tax_invoices')
+    .select('*, ti_items(*)')
+    .eq('id', params.id)
+    .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
   return NextResponse.json(data)
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerClient()
-  const body = await request.json()
-  const { items, ...tiData } = body
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  // Coerce empty strings to null for DATE columns to avoid Postgres parse errors
-  const dateFields = ['payment_due_date', 'delivery_date', 'order_date', 'invoice_date'] as const
-  for (const f of dateFields) {
-    if (tiData[f] === '') tiData[f] = null
-  }
+  const body = await request.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
 
-  const { error } = await supabase.from('tax_invoices').update(tiData).eq('id', params.id)
+  const parsed = parse(tiUpdateSchema, body)
+  if (parsed instanceof NextResponse) return parsed
+
+  const { items, ...tiData } = parsed
+  const safe = stripManagedFields(tiData as Record<string, unknown>)
+
+  const { error } = await supabase.from('tax_invoices').update(safe).eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
   if (items) {
-    await supabase.from('ti_items').delete().eq('ti_id', params.id)
-    if (items.length > 0) {
-      await supabase.from('ti_items').insert(
-        items.map((item: Record<string, unknown>, i: number) => ({ ...item, ti_id: params.id, sort_order: i }))
-      )
+    // Smart merge
+    const { data: existing } = await supabase
+      .from('ti_items').select('id').eq('ti_id', params.id)
+    const existingIds = new Set((existing ?? []).map((r: { id: string }) => r.id))
+    const submittedIds = new Set(items.filter(i => i.id).map(i => i.id as string))
+
+    const toDelete = [...existingIds].filter(id => !submittedIds.has(id))
+    if (toDelete.length > 0) {
+      await supabase.from('ti_items').delete().in('id', toDelete)
+    }
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i] as Record<string, unknown>
+      const safeItem = stripManagedFields(item)
+      if (item.id && existingIds.has(item.id as string)) {
+        await supabase.from('ti_items').update({ ...safeItem, sort_order: i }).eq('id', item.id as string)
+      } else {
+        await supabase.from('ti_items').insert({ ...safeItem, ti_id: params.id, sort_order: i })
+      }
     }
   }
-  // Re-fetch with nested items so the client has the full record immediately
+
   const { data: full, error: fetchErr } = await supabase
     .from('tax_invoices').select('*, ti_items(*)').eq('id', params.id).single()
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 })
@@ -37,7 +63,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   const { error } = await supabase.from('tax_invoices').delete().eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })

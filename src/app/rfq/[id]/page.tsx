@@ -49,7 +49,7 @@ export default function RFQDetailPage() {
           <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
             <Edit2 className="w-4 h-4" /> Edit
           </button>
-          <Link href={`/proforma/new?rfq_id=${rfq.id}`} className="btn btn-gold btn-sm">
+          <Link href={`/proforma/new?rfq_id=${rfq.id}`} className="btn btn-primary btn-sm">
             <FileText className="w-4 h-4" /> Create Proforma
           </Link>
           <button className="btn btn-primary btn-sm" onClick={() => window.print()}>
