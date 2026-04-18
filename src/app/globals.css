@@ -74,8 +74,8 @@
            shadow-[inset_0_1px_2px_0_rgba(17,24,39,0.03)]
            placeholder:text-slate-400
            transition-all duration-150
-           focus:outline-none focus:border-[var(--heritage-600)]
-           focus:ring-4 focus:ring-[var(--heritage-200)]/50
+           focus:outline-none focus:border-heritage-600
+           focus:ring-4 focus:ring-heritage-200/50
            hover:border-slate-300
            disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed;
   }
@@ -99,7 +99,7 @@
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold
            transition-all duration-150
-           focus:outline-none focus-visible:ring-4 focus-visible:ring-[var(--heritage-200)]/60
+           focus:outline-none focus-visible:ring-4 focus-visible:ring-heritage-200/60
            disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap
            active:translate-y-px select-none;
   }
@@ -110,7 +110,7 @@
   }
 
   .btn-secondary {
-    @apply bg-white text-slate-700 border border-slate-200 shadow-soft hover:border-[var(--heritage-400)] hover:text-[var(--heritage-700)] hover:bg-[var(--heritage-50)];
+    @apply bg-white text-slate-700 border border-slate-200 shadow-soft hover:border-heritage-400 hover:text-heritage-700 hover:bg-heritage-50;
   }
 
   .btn-ghost {
@@ -146,7 +146,7 @@
   }
 
   .card-header h3 {
-    @apply text-sm font-bold text-[var(--heritage-900)] tracking-tight;
+    @apply text-sm font-bold text-heritage-900 tracking-tight;
   }
 
   .card-body { @apply p-5 sm:p-6; }
@@ -170,7 +170,7 @@
   }
 
   .data-table tbody tr {
-    @apply hover:bg-[var(--heritage-50)]/60 transition-colors;
+    @apply hover:bg-heritage-50/60 transition-colors;
   }
 
   .data-table tbody td {
@@ -191,8 +191,8 @@
 
   /* ---- Section dividers ---- */
   .section-title {
-    @apply text-[11px] font-bold text-[var(--heritage-800)] uppercase tracking-[0.14em] mb-3 pb-1.5
-           border-b-2 border-[var(--heritage-600)] inline-block min-w-[120px];
+    @apply text-[11px] font-bold text-heritage-800 uppercase tracking-[0.14em] mb-3 pb-1.5
+           border-b-2 border-heritage-600 inline-block min-w-[120px];
   }
 
   /* ---- Pill / chip ---- */
