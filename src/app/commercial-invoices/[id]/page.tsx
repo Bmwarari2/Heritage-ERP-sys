@@ -55,8 +55,40 @@ function CIContent() {
           quantity: i.quantity, unit_price: i.unit_price,
         })) ?? [])
       })
+    } else if (batchId) {
+      // Prefill from dispatch batch
+      fetch(`/api/dispatch-batches/${batchId}`).then(r => r.json()).then(batch => {
+        if (!batch?.purchase_orders) return
+        const po = batch.purchase_orders
+        const shipTo = [po.ship_to_company, po.ship_to_po_box ? `PO Box ${po.ship_to_po_box}` : null,
+          [po.ship_to_town, po.ship_to_post_code].filter(Boolean).join(' '), po.ship_to_country]
+          .filter(Boolean).join('\n')
+        const shipperAddr = [po.vendor_name, [po.vendor_city, po.vendor_post_code].filter(Boolean).join(' '),
+          po.vendor_country].filter(Boolean).join('\n')
+        setForm(f => ({
+          ...f,
+          purchase_order_number: po.po_number ?? '',
+          currency: po.currency ?? 'GBP',
+          terms_of_sale: po.inco_terms ?? '',
+          shipper_address: shipperAddr,
+          consignee_name: po.bill_to_company ?? po.ship_to_company ?? '',
+          consignee_address: shipTo,
+        }))
+        const batchItems = (batch.dispatch_batch_items ?? [])
+          .map((bi: { dispatched_qty: number; po_items: { item_number: string; description_short: string | null; description_full: string | null; net_price: number; unit_price: number } }) => {
+            const po_item = bi.po_items
+            const desc = [po_item.description_short, po_item.description_full].filter(Boolean).join(' — ')
+            return {
+              item_number: po_item.item_number,
+              product_description: desc,
+              quantity: bi.dispatched_qty,
+              unit_price: Number(po_item.net_price) || Number(po_item.unit_price) || 0,
+            }
+          })
+        if (batchItems.length > 0) setItems(batchItems)
+      })
     }
-  }, [id])
+  }, [id, batchId, isNew])
 
   function setField(key: string, value: string) { setForm(f => ({ ...f, [key]: value })) }
   function setItemField(i: number, key: string, value: string | number) {

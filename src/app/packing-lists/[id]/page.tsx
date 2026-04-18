@@ -49,8 +49,36 @@ function PLContent() {
         setItems(data.packing_list_items ?? [{ item_number: '1', quantity: 1, description: '' }])
         setBoxes(data.packing_list_boxes?.length > 0 ? data.packing_list_boxes : [{ box_number: 1, box_type: 'Cardboard', dimension_l: 0, dimension_w: 0, dimension_h: 0, gross_weight: 0, notes: '' }])
       })
+    } else if (batchId) {
+      // Prefill from dispatch batch
+      fetch(`/api/dispatch-batches/${batchId}`).then(r => r.json()).then(batch => {
+        if (!batch?.purchase_orders) return
+        const po = batch.purchase_orders
+        const shipTo = [po.ship_to_company, po.ship_to_po_box ? `PO Box ${po.ship_to_po_box}` : null,
+          [po.ship_to_town, po.ship_to_post_code].filter(Boolean).join(' '), po.ship_to_country]
+          .filter(Boolean).join('\n')
+        setForm(f => ({
+          ...f,
+          customer_po_number: po.po_number ?? '',
+          our_order_number: po.your_reference ?? '',
+          shipped_via: po.mode_of_transport ?? '',
+          sales_person: po.sales_person ?? '',
+          ship_to_address: shipTo,
+        }))
+        const batchItems = (batch.dispatch_batch_items ?? [])
+          .map((bi: { dispatched_qty: number; po_items: { item_number: string; description_short: string | null; description_full: string | null } }) => {
+            const po_item = bi.po_items
+            const desc = [po_item.description_short, po_item.description_full].filter(Boolean).join(' — ')
+            return {
+              item_number: po_item.item_number,
+              quantity: bi.dispatched_qty,
+              description: desc,
+            }
+          })
+        if (batchItems.length > 0) setItems(batchItems)
+      })
     }
-  }, [id])
+  }, [id, batchId, isNew])
 
   function setField(key: string, value: string) { setForm(f => ({ ...f, [key]: value })) }
   function setItemField(i: number, key: string, value: string | number) {
