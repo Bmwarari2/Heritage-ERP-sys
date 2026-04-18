@@ -62,7 +62,8 @@ export default function RFQDetailPage() {
       {/* ---- Print Layout ---- */}
       <div className="card card-body w-full print-page rfq-print-page" id="rfq-print">
         <div className="rfq-print-inner">
-          {/* Header: Title + reference block (left) | HTML-rendered logo (right) */}
+          {/* Header: Title + reference block (the background image already
+              carries the Heritage logo in the top-right corner). */}
           <div className="rfq-header">
             <div className="rfq-header-left">
               <p className="rfq-doc-label">Document</p>
@@ -94,37 +95,6 @@ export default function RFQDetailPage() {
                   </>
                 )}
               </dl>
-            </div>
-
-            <div className="rfq-header-right" aria-label="Heritage Global Solutions Ltd">
-              <svg className="rfq-brand-shield" viewBox="0 0 140 150" aria-hidden="true">
-                <defs>
-                  <linearGradient id="rfqShieldLight" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#BCD3E6" />
-                    <stop offset="100%" stopColor="#86A8C7" />
-                  </linearGradient>
-                  <linearGradient id="rfqShieldDark" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#5B6D7C" />
-                    <stop offset="100%" stopColor="#2F3F4F" />
-                  </linearGradient>
-                </defs>
-                <path d="M5 5 H135 V90 Q135 125 70 145 Q5 125 5 90 Z" fill="#FFFFFF" stroke="#A9B3BD" strokeWidth="3" />
-                <path d="M8 8 H70 V143 Q8 125 8 90 Z" fill="url(#rfqShieldLight)" />
-                <path d="M70 8 H132 V90 Q132 125 70 143 Z" fill="url(#rfqShieldDark)" />
-                <path
-                  d="M38 30 C 38 30, 52 22, 60 28
-                     C 68 34, 58 52, 62 70
-                     C 66 85, 82 92, 92 82
-                     C 102 72, 96 58, 82 60
-                     C 68 62, 58 78, 62 100
-                     C 65 118, 78 128, 92 122"
-                  fill="none" stroke="#FFFFFF" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" opacity="0.95"
-                />
-              </svg>
-              <div className="rfq-brand-text">
-                <span className="rfq-brand-wordmark">HERITAGE</span>
-                <span className="rfq-brand-subtitle">Global Solutions Ltd</span>
-              </div>
             </div>
           </div>
 
