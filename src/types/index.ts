@@ -2,7 +2,30 @@
 // Heritage Global Solutions ERP — TypeScript Types
 // ============================================================
 
-export type DocumentStatus = 'draft' | 'sent' | 'responded' | 'closed' | 'active' | 'partial' | 'complete' | 'cancelled' | 'issued' | 'paid' | 'accepted'
+/**
+ * Per-document status unions. Splitting these replaces the old catch-all
+ * `DocumentStatus` and lets TypeScript catch invalid transitions at the
+ * call site (e.g. an RFQ will never be `paid`).
+ */
+export type RFQStatus        = 'draft' | 'sent' | 'responded' | 'closed'
+export type ProformaStatus   = 'draft' | 'sent' | 'accepted' | 'cancelled'
+export type POStatus         = 'draft' | 'active' | 'partial' | 'complete' | 'cancelled'
+export type CIStatus         = 'draft' | 'issued' | 'cancelled'
+export type TIStatus         = 'draft' | 'issued' | 'paid' | 'cancelled'
+export type PLStatus         = 'draft' | 'issued'
+
+/**
+ * @deprecated Prefer the per-document status aliases above. Kept as a union
+ * of every known status for incremental migration; new code should not
+ * reference this.
+ */
+export type DocumentStatus =
+  | RFQStatus
+  | ProformaStatus
+  | POStatus
+  | CIStatus
+  | TIStatus
+  | PLStatus
 
 // ---- CLIENTS ---------------------------------------------------
 export interface Client {
@@ -77,7 +100,7 @@ export interface RFQ {
   vendor_fax: string | null
   vendor_email: string | null
   comments: string | null
-  status: DocumentStatus
+  status: RFQStatus
   source: DocumentSource
   original_pdf_url: string | null
   created_by: string | null
@@ -126,7 +149,7 @@ export interface ProformaInvoice {
   tax_amount: number
   total_amount: number
   notes: string | null
-  status: DocumentStatus
+  status: ProformaStatus
   client_id: string | null
   created_by: string | null
   created_at: string
@@ -202,7 +225,7 @@ export interface PurchaseOrder {
   delivery_address: string | null
   purchase_total: number
   standalone_notes: string | null
-  status: DocumentStatus
+  status: POStatus
   source: DocumentSource
   original_pdf_url: string | null
   created_by: string | null
@@ -282,7 +305,7 @@ export interface CommercialInvoice {
   final_destination: string | null
   total_amount: number
   notes: string | null
-  status: DocumentStatus
+  status: CIStatus
   created_by: string | null
   created_at: string
   updated_at: string
@@ -334,7 +357,7 @@ export interface TaxInvoice {
   bank_iban: string | null
   bank_swift: string | null
   notes: string | null
-  status: DocumentStatus
+  status: TIStatus
   created_by: string | null
   created_at: string
   updated_at: string
@@ -366,7 +389,7 @@ export interface PackingList {
   sales_person: string | null
   ship_to_address: string | null
   notes: string | null
-  status: DocumentStatus
+  status: PLStatus
   created_by: string | null
   created_at: string
   updated_at: string

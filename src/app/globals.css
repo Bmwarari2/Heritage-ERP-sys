@@ -30,14 +30,10 @@
     --surface-1: #F7F9FC;
     --surface-2: #EEF2F8;
     --border-subtle: #E5EBF2;
-
-    /* Legacy aliases — preserved so any existing inline hex refs keep rendering the new palette */
-    --navy: #1E3A5F;
-    --gold: #3A6EA5;
   }
 
   html {
-    font-family: 'Book Antiqua', 'Palatino Linotype', Palatino, Georgia, serif;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -115,11 +111,6 @@
 
   .btn-ghost {
     @apply bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 shadow-none;
-  }
-
-  .btn-gold {
-    background-image: linear-gradient(180deg, var(--heritage-500) 0%, var(--heritage-700) 100%);
-    @apply text-white shadow-soft hover:brightness-110;
   }
 
   .btn-danger {

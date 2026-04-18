@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseRFQFromText, parsePOFromText } from '@/lib/claude'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,11 @@ async function extractPdfText(buffer: Buffer): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  // Auth check — this route calls Anthropic and burns tokens; gate it.
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -66,6 +72,15 @@ export async function POST(request: NextRequest) {
       parsed = docType === 'rfq' ? await parseRFQFromText(pdfText) : await parsePOFromText(pdfText)
     } catch (err) {
       console.error('Claude parsing error:', err)
+      const message = err instanceof Error ? err.message : 'AI parsing failed.'
+      // Surface "response was truncated" / max_tokens scenarios to the user
+      // instead of letting a JSON.parse crash masquerade as a generic failure.
+      if (/max_tokens|truncat|unexpected end of json/i.test(message)) {
+        return NextResponse.json(
+          { error: 'Document too large to parse in one pass. Split it into smaller sections and retry.' },
+          { status: 422 }
+        )
+      }
       return NextResponse.json(
         { error: 'AI parsing failed. Please verify the document and try again.' },
         { status: 500 }

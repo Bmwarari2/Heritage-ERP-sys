@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { parse, changePasswordSchema } from '@/lib/validation'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
-  const { currentPassword, newPassword } = await request.json()
+  const body = await request.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
 
-  if (!currentPassword || !newPassword) {
-    return NextResponse.json({ error: 'Missing fields.' }, { status: 400 })
-  }
-  if (typeof newPassword !== 'string' || newPassword.length < 10) {
-    return NextResponse.json({ error: 'Password must be at least 10 characters.' }, { status: 400 })
-  }
+  const parsed = parse(changePasswordSchema, body)
+  if (parsed instanceof NextResponse) return parsed
+  const { currentPassword, newPassword } = parsed
 
   const supabase = createSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -40,16 +39,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: updateError.message }, { status: 400 })
   }
 
-  // Clear the must_change_password flag using service-role (bypasses RLS)
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  )
-  await admin
+  // With the `users_own_profile` RLS policy the user can clear the flag themselves.
+  const { error: profileError } = await supabase
     .from('profiles')
-    .update({ must_change_password: false, updated_at: new Date().toISOString() })
+    .update({ must_change_password: false })
     .eq('id', user.id)
+
+  if (profileError) {
+    return NextResponse.json({ error: profileError.message }, { status: 500 })
+  }
 
   return NextResponse.json({ success: true })
 }

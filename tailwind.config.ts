@@ -23,36 +23,11 @@ const config: Config = {
           900: '#1E3A5F', // deepest brand navy
           950: '#14283F',
         },
-        // Slate gray — from the darker side of the shield
-        slate2: {
-          50:  '#F5F6F8',
-          100: '#E8EAEE',
-          200: '#CED2DA',
-          300: '#A9B1BD',
-          400: '#7A8593',
-          500: '#5C6772',
-          600: '#4A535E',
-          700: '#3A4350',
-          800: '#2F3641',
-          900: '#232931',
-        },
-        // Legacy aliases (kept so existing code keeps working)
-        brand: {
-          50:  '#F3F7FB',
-          100: '#E4EEF7',
-          200: '#C7DCEC',
-          300: '#9FC1DC',
-          400: '#6FA0C6',
-          500: '#4A82B0',
-          600: '#3A6EA5',
-          700: '#2F5F8F',
-          800: '#264D74',
-          900: '#1E3A5F',
-          950: '#14283F',
-        },
       },
       fontFamily: {
-        sans: ['"Book Antiqua"', '"Palatino Linotype"', 'Palatino', 'Georgia', 'serif'],
+        // Sans for on-screen — high-legibility UI text.
+        sans: ['Inter', '"Segoe UI"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        // Serif reserved for printed documents (invoices, POs, RFQs).
         serif: ['"Book Antiqua"', '"Palatino Linotype"', 'Palatino', 'Georgia', 'serif'],
         script: ['"Brush Script MT"', '"Segoe Script"', 'cursive'],
       },

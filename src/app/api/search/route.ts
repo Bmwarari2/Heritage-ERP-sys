@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { sanitizeSearchTerm } from '@/lib/validation'
 
 export async function GET(request: NextRequest) {
-  const supabase = createServerClient()
-  const q = new URL(request.url).searchParams.get('q')?.trim() ?? ''
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  const raw = new URL(request.url).searchParams.get('q') ?? ''
+  const q = sanitizeSearchTerm(raw)
 
   if (q.length < 2) return NextResponse.json({})
 

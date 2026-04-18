@@ -1,20 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { parse, clientUpdateSchema, stripManagedFields } from '@/lib/validation'
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   const { data, error } = await supabase.from('clients').select('*').eq('id', params.id).single()
   if (error) return NextResponse.json({ error: error.message }, { status: 404 })
   return NextResponse.json(data)
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerClient()
-  const body = await request.json()
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  const body = await request.json().catch(() => null)
+  if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+
+  const parsed = parse(clientUpdateSchema, body)
+  if (parsed instanceof NextResponse) return parsed
+
+  const safe = stripManagedFields(parsed as Record<string, unknown>)
 
   const { data, error } = await supabase
     .from('clients')
-    .update({ ...body, updated_at: new Date().toISOString() })
+    .update(safe)
     .eq('id', params.id)
     .select()
     .single()
@@ -24,7 +37,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createServerClient()
+  const supabase = createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
   const { error } = await supabase.from('clients').delete().eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
