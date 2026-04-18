@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   ClipboardList, FileText, ShoppingCart, Receipt,
-  FileCheck2, Package, ArrowRight, Upload,
+  FileCheck2, Package, ArrowRight, Upload, Briefcase,
 } from 'lucide-react'
 import Header from '@/components/layout/Header'
 
@@ -55,83 +55,94 @@ export default function DashboardPage() {
 
   const modules = [
     { label: 'Request for Quotation', short: 'RFQs',       icon: ClipboardList, href: '/rfq',                 count: stats.rfqs,               desc: 'Create or upload RFQs — AI-parsed' },
-    { label: 'Proforma Invoices',     short: 'Proformas',  icon: FileText,      href: '/proforma',            count: stats.proformas,          desc: 'Linked to parent RFQs' },
+    { label: 'Proforma Invoices',     short: 'Proformas',  icon: FileText,      href: '/proforma',            count: stats.proformas,          desc: 'Linked quotes based on RFQs' },
     { label: 'Purchase Orders',       short: 'POs',        icon: ShoppingCart,  href: '/purchase-orders',     count: stats.pos,                desc: 'Client & standalone — dispatch tracking' },
-    { label: 'Commercial Invoices',   short: 'Commercial', icon: Receipt,       href: '/commercial-invoices', count: stats.commercialInvoices, desc: 'Generated from PO dispatches' },
+    { label: 'Commercial Invoices',   short: 'Commercial', icon: Receipt,       href: '/commercial-invoices', count: stats.commercialInvoices, desc: 'Auto-generated from PO dispatch' },
     { label: 'Tax Invoices',          short: 'Tax',        icon: FileCheck2,    href: '/tax-invoices',        count: stats.taxInvoices,        desc: 'VAT invoices from dispatches' },
-    { label: 'Packing Lists',         short: 'Packing',    icon: Package,       href: '/packing-lists',       count: stats.packingLists,       desc: 'With box details per dispatch' },
+    { label: 'Packing Lists',         short: 'Packing',    icon: Package,       href: '/packing-lists',       count: stats.packingLists,       desc: 'Box and weight details per dispatch' },
   ]
 
   const workflow = [
-    { label: 'Upload / Create RFQ',    tone: 'bg-heritage-100 text-heritage-800' },
-    { label: 'Create Proforma',        tone: 'bg-heritage-200 text-heritage-900' },
-    { label: 'Upload / Create PO',     tone: 'bg-heritage-300 text-heritage-900' },
-    { label: 'Mark Items Ready',       tone: 'bg-slate-200 text-slate-800' },
-    { label: 'Dispatch: CI + TI + PL', tone: 'bg-heritage-600 text-white' },
+    { label: '1. RFQ',           tone: 'bg-white text-slate-600 border border-slate-200' },
+    { label: '2. Proforma',      tone: 'bg-white text-slate-600 border border-slate-200' },
+    { label: '3. PO',            tone: 'bg-white text-slate-600 border border-slate-200' },
+    { label: '4. Dispatch',      tone: 'bg-heritage-100 text-heritage-800 border border-heritage-200' },
+    { label: '5. Documentation', tone: 'bg-heritage-600 text-white shadow-md' },
   ]
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden">
+    <div className="flex flex-col flex-1 overflow-hidden bg-slate-50/50">
       <Header title="Dashboard" subtitle="Heritage Global Solutions — Trade ERP" />
 
       <div className="flex-1 overflow-y-auto scroll-subtle">
-        <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full animate-fade-in">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full animate-fade-in space-y-8">
 
-          {/* Compact welcome banner */}
-          <div className="mb-6 rounded-xl bg-gradient-to-r from-[var(--heritage-800)] to-[var(--heritage-600)] px-5 py-4 text-white shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="text-lg font-bold">Welcome back</h2>
-              <p className="text-white/70 text-sm">
-                Manage RFQs, Proformas, POs and dispatch documents from one place.
+          {/* Modernized welcome banner */}
+          <div className="relative overflow-hidden rounded-2xl bg-heritage-900 text-white shadow-lg p-8 sm:p-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+            <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/4 opacity-10 pointer-events-none">
+              <Briefcase className="w-96 h-96" />
+            </div>
+
+            <div className="relative z-10 max-w-xl">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">Welcome Back</h2>
+              <p className="text-heritage-100 text-sm sm:text-base leading-relaxed">
+                Streamline your trade operations. Manage RFQs, generate Proformas, and oversee PO dispatches seamlessly from one unified platform.
               </p>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
+
+            <div className="relative z-10 flex flex-col sm:flex-row gap-3 flex-shrink-0 w-full sm:w-auto">
               <Link href="/rfq/new?mode=upload"
-                    className="btn btn-primary btn-sm gap-1.5">
-                <Upload className="w-3.5 h-3.5" /> Upload RFQ
+                    className="btn bg-heritage-500 hover:bg-heritage-400 text-white border-transparent w-full sm:w-auto shadow-md">
+                <Upload className="w-4 h-4" /> Upload RFQ
               </Link>
               <Link href="/purchase-orders/new?mode=upload"
-                    className="btn btn-sm bg-white/95 text-[var(--heritage-900)] hover:bg-white shadow-soft gap-1.5">
-                <Upload className="w-3.5 h-3.5" /> Upload PO
+                    className="btn bg-white text-heritage-900 hover:bg-slate-100 border-transparent w-full sm:w-auto shadow-md">
+                <Upload className="w-4 h-4" /> Upload PO
               </Link>
             </div>
           </div>
 
-          {/* Unified module grid — count + label + description in one tile. */}
-          <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.14em] mb-3">Modules</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-8">
-            {modules.map(m => {
-              const Icon = m.icon
-              return (
-                <Link key={m.href} href={m.href}
-                      className="card card-body flex items-center gap-4 hover:border-[var(--heritage-400)] group">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--heritage-50)] border border-[var(--heritage-200)] flex items-center justify-center flex-shrink-0 group-hover:bg-[var(--heritage-600)] group-hover:border-[var(--heritage-600)] transition-colors">
-                    <Icon className="w-6 h-6 text-[var(--heritage-700)] group-hover:text-white transition-colors" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-baseline gap-2">
-                      <p className="font-semibold text-[var(--heritage-900)] truncate">{m.label}</p>
-                      <span className="text-xs font-bold text-[var(--heritage-700)]">({m.count})</span>
+          {/* Module grid */}
+          <div>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">Core Modules</h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {modules.map(m => {
+                const Icon = m.icon
+                return (
+                  <Link key={m.href} href={m.href}
+                        className="group flex flex-col p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-heritage-300 transition-all duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-heritage-50 group-hover:border-heritage-200 transition-colors">
+                        <Icon className="w-6 h-6 text-slate-500 group-hover:text-heritage-600 transition-colors" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-full group-hover:bg-heritage-50 group-hover:text-heritage-700 transition-colors">
+                        {m.count} Records
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-0.5 truncate">{m.desc}</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[var(--heritage-600)] group-hover:translate-x-1 transition-all flex-shrink-0" />
-                </Link>
-              )
-            })}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-slate-800 text-lg group-hover:text-heritage-700 transition-colors truncate">{m.label}</h4>
+                        <p className="text-sm text-slate-500 mt-1">{m.desc}</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 mt-1.5 text-slate-300 group-hover:text-heritage-600 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
 
-          {/* Workflow guide */}
-          <div className="card card-body">
-            <h3 className="font-bold text-[var(--heritage-900)] mb-4 text-sm uppercase tracking-wider">Document Workflow</h3>
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-sm">
+          {/* Workflow visualizer */}
+          <div>
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-4">System Workflow</h3>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 flex items-center gap-2 sm:gap-4 flex-wrap">
               {workflow.map((step, i) => (
-                <div key={i} className="flex items-center gap-1.5 sm:gap-2">
-                  <span className={`px-3 py-1.5 rounded-full font-semibold text-xs ${step.tone}`}>
+                <div key={i} className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                  <div className={`px-4 py-2 rounded-lg font-bold text-sm tracking-wide ${step.tone}`}>
                     {step.label}
-                  </span>
+                  </div>
                   {i < workflow.length - 1 && (
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
+                    <ArrowRight className="w-5 h-5 text-slate-300" />
                   )}
                 </div>
               ))}
