@@ -201,6 +201,168 @@
 }
 
 /* =========================================================
+   RFQ DOCUMENT — BRANDED A4 BACKGROUND LAYOUT
+   Applies to both screen preview and print.
+   The A4-BG.png already carries the blue side bars, a centered
+   watermark shield, and the Heritage logo in the top-right corner,
+   so no separate logo image is rendered from the HTML.
+   ========================================================= */
+.rfq-print-page {
+  position: relative;
+  background-image: url('/A4-BG.png');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: 100% auto;
+  background-color: #FFFFFF;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Keep the page content clear of the blue side bars and the
+   background logo in the top-right corner of the A4-BG image. */
+.rfq-print-page .rfq-print-inner {
+  padding: 18mm 22mm 14mm 22mm;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header: left column (label + title + reference box) / right column (HTML logo) */
+.rfq-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 18px;
+  padding-top: 6mm; /* push content below the background logo's top edge */
+}
+
+.rfq-header-left { min-width: 0; }
+
+.rfq-doc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--heritage-700);
+  margin: 0 0 4px 0;
+}
+
+.rfq-title {
+  font-size: 26px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--heritage-900);
+  margin: 0 0 10px 0;
+}
+
+/* Reference info block sits flush under the title */
+.rfq-ref-box {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  row-gap: 4px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid rgba(44, 98, 152, 0.25);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  max-width: 360px;
+}
+
+.rfq-ref-box dt {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  color: var(--heritage-700);
+  align-self: center;
+}
+
+.rfq-ref-box dd {
+  margin: 0;
+  color: var(--slate-900);
+  font-weight: 600;
+}
+
+/* Right column: large HTML/CSS rendered logo (shield + wordmark + subtitle) */
+.rfq-header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* Invisible so the background image's top-right logo stays the hero,
+     but this stands ready as the HTML anchor required by the spec. */
+}
+
+.rfq-brand-shield {
+  width: 60px;
+  height: 64px;
+  flex: 0 0 auto;
+}
+
+.rfq-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.rfq-brand-wordmark {
+  font-family: 'Times New Roman', 'Georgia', serif;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: #2F5F8F;
+}
+
+.rfq-brand-subtitle {
+  font-family: 'Brush Script MT', 'Segoe Script', cursive;
+  font-style: italic;
+  font-size: 14px;
+  color: #6B7280;
+  margin-top: 2px;
+}
+
+/* 2x2 address grid with horizontal rule between rows */
+.rfq-address-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+  margin: 14px 0 18px 0;
+  font-size: 12px;
+}
+
+.rfq-address-cell {
+  padding: 10px 12px;
+  border: 1px solid rgba(44, 98, 152, 0.22);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.rfq-address-cell .section-title {
+  margin-bottom: 6px;
+  padding-bottom: 3px;
+  min-width: 0;
+}
+
+.rfq-address-cell p { margin: 1px 0; }
+
+.rfq-address-divider {
+  grid-column: 1 / -1;
+  border: 0;
+  border-top: 1px solid rgba(44, 98, 152, 0.25);
+  margin: 4px 0;
+}
+
+/* Items heading must travel with the table — never orphan a heading */
+.rfq-items { break-inside: avoid; page-break-inside: avoid; }
+.rfq-items .section-title { break-after: avoid; page-break-after: avoid; }
+.rfq-items .data-table { break-before: avoid; page-break-before: avoid; }
+
+/* =========================================================
    MISC UTILITIES
    ========================================================= */
 input[type=number]::-webkit-inner-spin-button,
@@ -286,6 +448,38 @@ input[type=number] {
 
   /* Content sits above the watermark */
   .print-page > * { position: relative; z-index: 1; }
+
+  /* RFQ override — the A4-BG image already carries the watermark
+     shield, the side accent bars and the top-right logo, so we
+     suppress the default print watermark and let the background
+     image own the full page. */
+  .rfq-print-page {
+    background-image: url('/A4-BG.png') !important;
+    background-repeat: no-repeat !important;
+    background-position: center top !important;
+    background-size: 100% 100% !important;
+    background-color: #FFFFFF !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .rfq-print-page::before { content: none !important; display: none !important; }
+
+  .rfq-print-page .rfq-print-inner {
+    padding: 16mm 20mm 12mm 20mm !important;
+  }
+
+  /* Cards/tables inside the RFQ print page stay transparent so the
+     branded background shows through cleanly. */
+  .rfq-print-page .rfq-address-cell {
+    background: rgba(255, 255, 255, 0.78) !important;
+    border: 1px solid rgba(44, 98, 152, 0.30) !important;
+  }
+
+  .rfq-print-page .rfq-ref-box {
+    background: rgba(255, 255, 255, 0.82) !important;
+    border: 1px solid rgba(44, 98, 152, 0.30) !important;
+  }
 
   /* Structural print boxes — crisp outlines around grouped data */
   .print-box {
