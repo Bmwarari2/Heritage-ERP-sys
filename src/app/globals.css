@@ -212,7 +212,7 @@
   background-image: url('/A4-BG.png');
   background-repeat: no-repeat;
   background-position: center top;
-  background-size: 100% auto;
+  background-size: 100% 100%;
   background-color: #FFFFFF;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
@@ -221,19 +221,19 @@
 /* Keep the page content clear of the blue side bars and the
    background logo in the top-right corner of the A4-BG image. */
 .rfq-print-page .rfq-print-inner {
-  padding: 18mm 22mm 14mm 22mm;
+  padding: 14mm 16mm 12mm 16mm;
   position: relative;
   z-index: 1;
 }
 
-/* Header: left column (label + title + reference box) / right column (HTML logo) */
+/* Header: single column holding title + reference box. The background
+   image already carries the Heritage logo in the top-right corner,
+   so the header content stays on the left so it doesn't collide. */
 .rfq-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 24px;
-  align-items: start;
   margin-bottom: 18px;
-  padding-top: 6mm; /* push content below the background logo's top edge */
+  padding-top: 6mm;
+  /* Reserve the top-right quadrant for the background-image logo. */
+  max-width: 62%;
 }
 
 .rfq-header-left { min-width: 0; }
@@ -285,43 +285,6 @@
   margin: 0;
   color: var(--slate-900);
   font-weight: 600;
-}
-
-/* Right column: large HTML/CSS rendered logo (shield + wordmark + subtitle) */
-.rfq-header-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  /* Invisible so the background image's top-right logo stays the hero,
-     but this stands ready as the HTML anchor required by the spec. */
-}
-
-.rfq-brand-shield {
-  width: 60px;
-  height: 64px;
-  flex: 0 0 auto;
-}
-
-.rfq-brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-}
-
-.rfq-brand-wordmark {
-  font-family: 'Times New Roman', 'Georgia', serif;
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  color: #2F5F8F;
-}
-
-.rfq-brand-subtitle {
-  font-family: 'Brush Script MT', 'Segoe Script', cursive;
-  font-style: italic;
-  font-size: 14px;
-  color: #6B7280;
-  margin-top: 2px;
 }
 
 /* 2x2 address grid with horizontal rule between rows */
@@ -449,36 +412,74 @@ input[type=number] {
   /* Content sits above the watermark */
   .print-page > * { position: relative; z-index: 1; }
 
-  /* RFQ override — the A4-BG image already carries the watermark
-     shield, the side accent bars and the top-right logo, so we
-     suppress the default print watermark and let the background
-     image own the full page. */
+  /* RFQ — keep the print layout identical to the screen layout.
+     The A4-BG image already carries the watermark shield, the
+     blue side accent bars and the top-right corner logo, so we
+     disable the default print-page watermark and hold every
+     layout-critical rule steady against the generic strip rules
+     further up this @media block. */
   .rfq-print-page {
+    /* Full printable page — @page gives us 10mm physical margins. */
+    width: 100% !important;
+    max-width: 190mm !important;
+    min-height: 277mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
     background-image: url('/A4-BG.png') !important;
     background-repeat: no-repeat !important;
     background-position: center top !important;
     background-size: 100% 100% !important;
     background-color: #FFFFFF !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   .rfq-print-page::before { content: none !important; display: none !important; }
 
+  /* Same inner padding as screen so nothing shifts when printing. */
   .rfq-print-page .rfq-print-inner {
-    padding: 16mm 20mm 12mm 20mm !important;
+    padding: 14mm 16mm 12mm 16mm !important;
+    position: relative;
+    z-index: 1;
   }
 
-  /* Cards/tables inside the RFQ print page stay transparent so the
-     branded background shows through cleanly. */
+  /* Keep the single-column header and the 2x2 address grid steady
+     under print — explicit values prevent resets from the generic
+     card/card-body strip rules. */
+  .rfq-print-page .rfq-header {
+    display: block !important;
+    margin-bottom: 14px !important;
+    padding-top: 4mm !important;
+    max-width: 62% !important;
+  }
+
+  .rfq-print-page .rfq-address-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px 12px !important;
+    margin: 10px 0 14px 0 !important;
+  }
+
   .rfq-print-page .rfq-address-cell {
-    background: rgba(255, 255, 255, 0.78) !important;
+    background: rgba(255, 255, 255, 0.82) !important;
     border: 1px solid rgba(44, 98, 152, 0.30) !important;
+    border-radius: 6px !important;
+    padding: 8px 10px !important;
   }
 
   .rfq-print-page .rfq-ref-box {
-    background: rgba(255, 255, 255, 0.82) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
     border: 1px solid rgba(44, 98, 152, 0.30) !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+  }
+
+  .rfq-print-page .rfq-title {
+    font-size: 22px !important;
+    margin: 0 0 8px 0 !important;
   }
 
   /* Structural print boxes — crisp outlines around grouped data */
