@@ -10,3 +10,7 @@ ALTER TABLE public.proforma_invoices
 -- Clients: separate billing address
 ALTER TABLE public.clients
   ADD COLUMN IF NOT EXISTS billing_address TEXT;
+
+-- Clients: notify party for shipping docs
+ALTER TABLE public.clients
+  ADD COLUMN IF NOT EXISTS notify_party TEXT;

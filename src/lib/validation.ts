@@ -249,6 +249,7 @@ const poBase = z
     status: z.enum(['draft', 'active', 'partial', 'complete', 'cancelled']).optional(),
     source: z.enum(['manual', 'uploaded']).optional(),
     original_pdf_url: nullableString(),
+    client_id: z.string().uuid().nullable().optional(),
     items: z.array(poItemSchema).optional(),
   })
   .passthrough()
@@ -311,6 +312,7 @@ const ciBase = z
     total_amount: numField(0),
     notes: nullableString(),
     status: z.enum(['draft', 'issued', 'cancelled']).optional(),
+    client_id: z.string().uuid().nullable().optional(),
     items: z.array(ciItemSchema).optional(),
   })
   .passthrough()
@@ -362,6 +364,7 @@ const tiBase = z
     bank_swift: nullableString(),
     notes: nullableString(),
     status: z.enum(['draft', 'issued', 'paid', 'cancelled']).optional(),
+    client_id: z.string().uuid().nullable().optional(),
     items: z.array(tiItemSchema).optional(),
   })
   .passthrough()
@@ -406,6 +409,7 @@ const plBase = z
     ship_to_address: nullableString(),
     notes: nullableString(),
     status: z.enum(['draft', 'issued']).optional(),
+    client_id: z.string().uuid().nullable().optional(),
     items: z.array(plItemSchema).optional(),
     boxes: z.array(plBoxSchema).optional(),
   })
@@ -424,6 +428,7 @@ const clientBase = z
     phone: nullableString(),
     address: nullableString(),
     billing_address: nullableString(),
+    notify_party: nullableString(),
     country: nullableString(),
     vat_number: nullableString(),
     notes: nullableString(),

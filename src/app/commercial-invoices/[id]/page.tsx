@@ -8,7 +8,7 @@ import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
 import { printPdf } from '@/lib/print-pdf'
 import { formatDate, formatCurrency } from '@/lib/utils'
-import type { CommercialInvoice } from '@/types'
+import type { CommercialInvoice, Client } from '@/types'
 
 function CIContent() {
   const { id } = useParams<{ id: string }>()
@@ -17,14 +17,16 @@ function CIContent() {
   const isNew = id === 'new'
   const poId = searchParams.get('po_id')
   const batchId = searchParams.get('batch_id')
+  const initialClientId = searchParams.get('client_id') ?? ''
 
   const [ci, setCi] = useState<CommercialInvoice | null>(null)
+  const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState(isNew)
 
   const [form, setForm] = useState({
-    po_id: poId ?? '', batch_id: batchId ?? '',
+    po_id: poId ?? '', batch_id: batchId ?? '', client_id: initialClientId,
     purchase_order_number: '', invoice_date: new Date().toISOString().slice(0, 10),
     currency: 'GBP', awb_bl_number: '', country_of_origin: 'United Kingdom',
     terms_of_sale: '', shipper_name: 'Heritage Global Solutions Ltd',
@@ -36,11 +38,15 @@ function CIContent() {
   const [items, setItems] = useState([{ item_number: '1', product_description: '', quantity: 1, unit_price: 0 }])
 
   useEffect(() => {
+    fetch('/api/clients').then(r => r.json()).then(d => setClients(Array.isArray(d) ? d : [])).catch(() => setClients([]))
+  }, [])
+
+  useEffect(() => {
     if (!isNew) {
       fetch(`/api/commercial-invoices/${id}`).then(r => r.json()).then(data => {
         setCi(data); setLoading(false)
         setForm({
-          po_id: data.po_id ?? '', batch_id: data.batch_id ?? '',
+          po_id: data.po_id ?? '', batch_id: data.batch_id ?? '', client_id: data.client_id ?? '',
           purchase_order_number: data.purchase_order_number ?? '', invoice_date: data.invoice_date,
           currency: data.currency, awb_bl_number: data.awb_bl_number ?? '',
           country_of_origin: data.country_of_origin ?? 'United Kingdom',
@@ -66,6 +72,7 @@ function CIContent() {
           po.vendor_country].filter(Boolean).join('\n')
         setForm(f => ({
           ...f,
+          client_id: po.client_id ?? f.client_id,
           purchase_order_number: po.po_number ?? '',
           currency: po.currency ?? 'GBP',
           terms_of_sale: po.inco_terms ?? '',
@@ -95,11 +102,23 @@ function CIContent() {
     setItems(items => items.map((item, idx) => idx === i ? { ...item, [key]: value } : item))
   }
 
+  function applyClient(clientId: string) {
+    const c = clients.find(cl => cl.id === clientId)
+    if (!c) { setForm(f => ({ ...f, client_id: '' })); return }
+    setForm(f => ({
+      ...f,
+      client_id: c.id,
+      consignee_name: c.name,
+      consignee_address: c.address ?? f.consignee_address,
+      notify_party: c.notify_party ?? f.notify_party,
+    }))
+  }
+
   const totalAmount = items.reduce((sum, i) => sum + (Number(i.quantity) * Number(i.unit_price)), 0)
 
   async function handleSave() {
     setSaving(true)
-    const payload = { ...form, total_amount: totalAmount, items }
+    const payload = { ...form, client_id: form.client_id || null, total_amount: totalAmount, items }
     const url = isNew ? '/api/commercial-invoices' : `/api/commercial-invoices/${id}`
     const method = isNew ? 'POST' : 'PUT'
     const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
@@ -146,6 +165,13 @@ function CIContent() {
             <div className="card">
               <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Consignee (Client)</h3></div>
               <div className="card-body space-y-3">
+                <div>
+                  <label className="form-label">Client</label>
+                  <select className="form-input" value={form.client_id} onChange={e => applyClient(e.target.value)}>
+                    <option value="">— Select client —</option>
+                    {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
                 <div><label className="form-label">Name</label><input className="form-input" value={form.consignee_name} onChange={e => setField('consignee_name', e.target.value)} /></div>
                 <div><label className="form-label">Address</label><textarea className="form-textarea" rows={2} value={form.consignee_address} onChange={e => setField('consignee_address', e.target.value)} /></div>
                 <div><label className="form-label">Notify Party</label><input className="form-input" value={form.notify_party} onChange={e => setField('notify_party', e.target.value)} /></div>

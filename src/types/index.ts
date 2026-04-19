@@ -37,6 +37,7 @@ export interface Client {
   phone: string | null
   address: string | null
   billing_address: string | null
+  notify_party: string | null
   country: string | null
   vat_number: string | null
   notes: string | null
@@ -231,6 +232,7 @@ export interface PurchaseOrder {
   status: POStatus
   source: DocumentSource
   original_pdf_url: string | null
+  client_id: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -309,6 +311,7 @@ export interface CommercialInvoice {
   total_amount: number
   notes: string | null
   status: CIStatus
+  client_id: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -361,6 +364,7 @@ export interface TaxInvoice {
   bank_swift: string | null
   notes: string | null
   status: TIStatus
+  client_id: string | null
   created_by: string | null
   created_at: string
   updated_at: string
@@ -393,6 +397,7 @@ export interface PackingList {
   ship_to_address: string | null
   notes: string | null
   status: PLStatus
+  client_id: string | null
   created_by: string | null
   created_at: string
   updated_at: string

@@ -19,7 +19,8 @@ export default function ClientDetailPage() {
 
   const [form, setForm] = useState({
     name: '', customer_id: '', contact_person: '', email: '', phone: '',
-    address: '', billing_address: '', country: '', vat_number: '', notes: '',
+    address: '', billing_address: '', notify_party: '',
+    country: '', vat_number: '', notes: '',
   })
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function ClientDetailPage() {
         phone: data.phone ?? '',
         address: data.address ?? '',
         billing_address: data.billing_address ?? '',
+        notify_party: data.notify_party ?? '',
         country: data.country ?? '',
         vat_number: data.vat_number ?? '',
         notes: data.notes ?? '',
@@ -122,6 +124,10 @@ export default function ClientDetailPage() {
                 </div>
               </div>
               <div>
+                <label className="form-label">Notify Party <span className="text-xs text-gray-400 font-normal">(for commercial invoices / shipping docs)</span></label>
+                <textarea className="form-textarea" rows={2} value={form.notify_party} onChange={e => setField('notify_party', e.target.value)} />
+              </div>
+              <div>
                 <label className="form-label">VAT / Tax Number</label>
                 <input className="form-input" value={form.vat_number} onChange={e => setField('vat_number', e.target.value)} />
               </div>
@@ -206,6 +212,12 @@ export default function ClientDetailPage() {
               <div className="text-gray-700 whitespace-pre-line bg-gray-50 rounded-lg p-3 text-sm">
                 <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Billing Address</p>
                 {client.billing_address}
+              </div>
+            )}
+            {client.notify_party && (
+              <div className="text-gray-700 whitespace-pre-line bg-gray-50 rounded-lg p-3 text-sm">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Notify Party</p>
+                {client.notify_party}
               </div>
             )}
             {client.notes && (
