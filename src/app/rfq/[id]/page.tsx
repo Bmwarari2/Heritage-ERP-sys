@@ -53,9 +53,17 @@ export default function RFQDetailPage() {
           <Link href={`/proforma/new?rfq_id=${rfq.id}`} className="btn btn-primary btn-sm">
             <FileText className="w-4 h-4" /> Create Proforma
           </Link>
-          <button className="btn btn-primary btn-sm" onClick={() => window.print()}>
-            <Printer className="w-4 h-4" /> Download PDF
+          <button className="btn btn-secondary btn-sm" onClick={() => window.print()}>
+            <Printer className="w-4 h-4" /> Print
           </button>
+          <a
+            href={`/api/rfq/${rfq.id}/pdf`}
+            className="btn btn-primary btn-sm"
+            target="_blank"
+            rel="noopener"
+          >
+            <FileText className="w-4 h-4" /> Download PDF
+          </a>
         </div>
       }
     >
