@@ -217,17 +217,16 @@
 /* =========================================================
    BRANDED DOCUMENT LAYOUT — shared across RFQ, PO, Proforma,
    Commercial Invoice, Tax Invoice and Packing List.
-   Applies to both screen preview and print. The A4-BG.png
-   already carries the blue side bars, a centered watermark
-   shield, and the Heritage logo in the top-right corner, so
-   no separate logo image is rendered from the HTML.
+   Screen preview uses a top-left logo mark at its natural size
+   (no scaling), while printed output keeps the full A4-BG.png
+   brand sheet — see the @media print block below.
    ========================================================= */
 .doc-print-page {
   position: relative;
-  background-image: url('/A4-BG.png');
+  background-image: url('/logo-view.svg');
   background-repeat: no-repeat;
-  background-position: center top;
-  background-size: 100% 100%;
+  background-position: top left;
+  background-size: auto;
   background-color: #FFFFFF;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
