@@ -70,6 +70,8 @@ export default function ProformaDetailPage() {
                 {pi.valid_until_date && (<><dt>Valid Until</dt><dd>{formatDate(pi.valid_until_date)}</dd></>)}
                 {refRfqNumber && (<><dt>Ref RFQ</dt><dd className="font-mono">{refRfqNumber}</dd></>)}
                 {pi.currency && (<><dt>Currency</dt><dd>{pi.currency}</dd></>)}
+                {pi.lead_time && (<><dt>Lead Time (ARO)</dt><dd>{pi.lead_time}</dd></>)}
+                {pi.payment_terms && (<><dt>Payment Terms</dt><dd>{pi.payment_terms}</dd></>)}
               </dl>
             </div>
           </div>

@@ -142,6 +142,8 @@ export interface ProformaInvoice {
   incoterm: string | null
   incoterm_country: string | null
   currency: string
+  lead_time: string | null
+  payment_terms: string | null
   vendor_name: string
   vendor_address: string | null
   subtotal: number

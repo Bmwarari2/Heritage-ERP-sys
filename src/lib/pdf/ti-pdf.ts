@@ -44,7 +44,7 @@ export async function generateTIPDF(ti: TaxInvoice): Promise<Buffer> {
         ti.customer_name,
         ti.customer_id && `Customer ID: ${ti.customer_id}`,
         ...(ti.customer_address?.split('\n') ?? []),
-        ti.customer_phone,
+        ti.customer_phone && `Phone: ${ti.customer_phone}`,
       ),
     },
     {

@@ -45,11 +45,13 @@ function TIContent() {
   })
 
   const [items, setItems] = useState([{ item_number: '1', item_description: '', quantity: 1, unit_price: 0 }])
+  const [companySettings, setCompanySettings] = useState<Record<string, string> | null>(null)
 
   // Auto-load company settings to pre-fill VAT/Reg and bank details
   useEffect(() => {
     fetch('/api/settings/company').then(r => r.json()).then(s => {
       if (!s || s.error) return
+      setCompanySettings(s)
       setForm(f => ({
         ...f,
         vat_reg_number: f.vat_reg_number || s.vat_reg_number || '',
@@ -64,6 +66,25 @@ function TIContent() {
     }).catch(() => {})
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Swap bank details when currency changes (only in edit mode, for USD/GBP)
+  useEffect(() => {
+    if (!editing || !companySettings) return
+    const cur = (form.currency || '').toUpperCase()
+    if (cur !== 'USD' && cur !== 'GBP') return
+    const isUSD = cur === 'USD'
+    const s = companySettings
+    setForm(f => ({
+      ...f,
+      bank_name: (isUSD ? s.usd_bank_name : s.gbp_bank_name) || '',
+      bank_account_name: (isUSD ? s.usd_account_name : s.gbp_account_name) || 'Heritage Global Solutions Ltd',
+      bank_account_number: (isUSD ? s.usd_account_number : s.gbp_account_number) || '',
+      bank_sort_code: (isUSD ? s.usd_sort_code : s.gbp_sort_code) || '',
+      bank_iban: (isUSD ? s.usd_iban : s.gbp_iban) || '',
+      bank_swift: (isUSD ? s.usd_swift : s.gbp_swift) || '',
+    }))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.currency, editing, companySettings])
 
   // Auto-populate logged-in user as sales_person for new TIs
   useEffect(() => {

@@ -171,6 +171,8 @@ const proformaBase = z
     incoterm: nullableString(),
     incoterm_country: nullableString(),
     currency: optionalString(),
+    lead_time: nullableString(),
+    payment_terms: nullableString(),
     vendor_name: optionalString(),
     vendor_address: nullableString(),
     subtotal: numField(0),

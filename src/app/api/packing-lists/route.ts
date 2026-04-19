@@ -41,6 +41,13 @@ export async function POST(request: NextRequest) {
   const { items, boxes, ...plData } = parsed
   const safe = stripManagedFields(plData as Record<string, unknown>)
 
+  // Auto-generate our_order_number when not supplied
+  if (!safe.our_order_number) {
+    const { data: seq, error: seqErr } = await supabase.rpc('next_doc_number', { p_doc_type: 'packing_list' })
+    if (seqErr) return NextResponse.json({ error: seqErr.message }, { status: 500 })
+    if (seq) safe.our_order_number = seq
+  }
+
   const { data: pl, error } = await supabase.from('packing_lists').insert(safe).select().single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 

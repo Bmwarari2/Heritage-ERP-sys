@@ -28,6 +28,14 @@ function buildVendorAddress(rfq: RFQ) {
     .filter(Boolean).join(', ')
 }
 
+/** Add `days` calendar days to an ISO yyyy-mm-dd date and return the new ISO date. */
+function addDaysISO(isoDate: string, days: number): string {
+  const d = new Date(isoDate)
+  if (isNaN(d.getTime())) return ''
+  d.setDate(d.getDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
 export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
@@ -35,10 +43,16 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
   const [showNotes, setShowNotes] = useState<Record<number, boolean>>({})
   const [clients, setClients] = useState<Client[]>([])
 
+  const todayISO = new Date().toISOString().slice(0, 10)
+  const defaultInvoiceDate = existing?.invoice_date ?? todayISO
+  // Proforma invoices are valid for 30 days from creation by default.
+  const defaultValidUntil =
+    existing?.valid_until_date ?? rfq?.quotation_deadline ?? addDaysISO(defaultInvoiceDate, 30)
+
   const [form, setForm] = useState({
     rfq_id: existing?.rfq_id ?? rfq?.id ?? '',
-    invoice_date: existing?.invoice_date ?? new Date().toISOString().slice(0, 10),
-    valid_until_date: existing?.valid_until_date ?? rfq?.quotation_deadline ?? '',
+    invoice_date: defaultInvoiceDate,
+    valid_until_date: defaultValidUntil,
     client_company: existing?.client_company ?? rfq?.buyer_company ?? '',
     client_department: existing?.client_department ?? rfq?.buyer_site ?? '',
     client_address: existing?.client_address ?? rfq?.postal_address ?? '',
@@ -48,6 +62,8 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
     incoterm: existing?.incoterm ?? '',
     incoterm_country: existing?.incoterm_country ?? '',
     currency: existing?.currency ?? 'GBP',
+    lead_time: existing?.lead_time ?? '',
+    payment_terms: existing?.payment_terms ?? '',
     vendor_name: existing?.vendor_name ?? rfq?.vendor_name ?? 'Heritage Global Solutions Ltd',
     vendor_address: existing?.vendor_address ?? (rfq ? buildVendorAddress(rfq) : ''),
     notes: existing?.notes ?? '',
@@ -126,7 +142,18 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
   }
 
   function setField(key: string, value: string | number) {
-    setForm(f => ({ ...f, [key]: value }))
+    setForm(f => {
+      const next = { ...f, [key]: value }
+      // Keep the 30-day default validity in sync with the invoice date
+      // until the user explicitly edits `valid_until_date`.
+      if (key === 'invoice_date' && typeof value === 'string' && value) {
+        const expected = addDaysISO(f.invoice_date, 30)
+        if (f.valid_until_date === expected || !f.valid_until_date) {
+          next.valid_until_date = addDaysISO(value, 30)
+        }
+      }
+      return next
+    })
   }
 
   function setItemField(i: number, key: string, value: string | number) {
@@ -228,6 +255,14 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
           <div>
             <label className="form-label">Incoterm Country</label>
             <input className="form-input" value={form.incoterm_country} onChange={e => setField('incoterm_country', e.target.value)} />
+          </div>
+          <div>
+            <label className="form-label">Lead Time (ARO)</label>
+            <input className="form-input" value={form.lead_time} onChange={e => setField('lead_time', e.target.value)} placeholder="e.g. 4-6 weeks ARO" />
+          </div>
+          <div>
+            <label className="form-label">Payment Terms</label>
+            <input className="form-input" value={form.payment_terms} onChange={e => setField('payment_terms', e.target.value)} placeholder="e.g. 30% advance, 70% on delivery" />
           </div>
         </div>
       </div>
