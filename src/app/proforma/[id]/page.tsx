@@ -30,7 +30,7 @@ export default function ProformaDetailPage() {
       <PageWrapper title={`Edit ${pi.proforma_number}`} actions={
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancel Edit</button>
       }>
-        <ProformaForm existing={pi} />
+        <ProformaForm existing={pi} onSaved={(updated) => { setPi(updated); setEditing(false) }} />
       </PageWrapper>
     )
   }

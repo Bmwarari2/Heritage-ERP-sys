@@ -17,6 +17,7 @@ type FormItem = {
 interface ProformaFormProps {
   rfq?: RFQ | null
   existing?: ProformaInvoice | null
+  onSaved?: (pi: ProformaInvoice) => void
 }
 
 const EMPTY_ITEM: FormItem = {
@@ -36,7 +37,7 @@ function addDaysISO(isoDate: string, days: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
+export default function ProformaForm({ rfq, existing, onSaved }: ProformaFormProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -202,6 +203,11 @@ export default function ProformaForm({ rfq, existing }: ProformaFormProps) {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Save failed'); setSaving(false); return }
+      if (existing && onSaved) {
+        onSaved(data)
+        setSaving(false)
+        return
+      }
       router.push(`/proforma/${data.id}`)
     } catch {
       setError('Network error')

@@ -423,6 +423,7 @@ const clientBase = z
     email: nullableString(),
     phone: nullableString(),
     address: nullableString(),
+    billing_address: nullableString(),
     country: nullableString(),
     vat_number: nullableString(),
     notes: nullableString(),

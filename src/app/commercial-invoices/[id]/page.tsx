@@ -234,12 +234,18 @@ function CIContent() {
               <p className="section-title">Shipper</p>
               <p className="font-medium">{ci.shipper_name}</p>
               {ci.shipper_address && <p className="whitespace-pre-line">{ci.shipper_address}</p>}
+              {ci.notify_party && (
+                <>
+                  <hr className="my-2 border-slate-300" />
+                  <p className="section-title">Notify Party</p>
+                  <p className="whitespace-pre-line">{ci.notify_party}</p>
+                </>
+              )}
             </div>
             <div className="doc-address-cell">
               <p className="section-title">Consignee</p>
               <p className="font-medium">{ci.consignee_name}</p>
               {ci.consignee_address && <p className="whitespace-pre-line">{ci.consignee_address}</p>}
-              {ci.notify_party && <p className="mt-1"><span className="font-medium">Notify Party:</span> {ci.notify_party}</p>}
               {ci.intermediate_consignee && <p><span className="font-medium">Intermediate Consignee:</span> {ci.intermediate_consignee}</p>}
             </div>
           </section>

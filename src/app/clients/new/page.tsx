@@ -12,7 +12,7 @@ export default function NewClientPage() {
 
   const [form, setForm] = useState({
     name: '', customer_id: '', contact_person: '', email: '', phone: '',
-    address: '', country: '', vat_number: '', notes: '',
+    address: '', billing_address: '', country: '', vat_number: '', notes: '',
   })
 
   function setField(key: string, value: string) {
@@ -78,9 +78,15 @@ export default function NewClientPage() {
                 <input className="form-input" value={form.country} onChange={e => setField('country', e.target.value)} placeholder="e.g. United Kingdom" />
               </div>
             </div>
-            <div>
-              <label className="form-label">Address</label>
-              <textarea className="form-textarea" rows={3} value={form.address} onChange={e => setField('address', e.target.value)} placeholder="Full postal address" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="form-label">Shipping / Physical Address</label>
+                <textarea className="form-textarea" rows={3} value={form.address} onChange={e => setField('address', e.target.value)} placeholder="Where goods are delivered" />
+              </div>
+              <div>
+                <label className="form-label">Billing Address <span className="text-xs text-gray-400 font-normal">(leave blank to use shipping)</span></label>
+                <textarea className="form-textarea" rows={3} value={form.billing_address} onChange={e => setField('billing_address', e.target.value)} placeholder="Where invoices are sent" />
+              </div>
             </div>
             <div>
               <label className="form-label">VAT / Tax Number</label>
