@@ -300,7 +300,10 @@ function TIContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
         {ti.po_id && <Link href={`/purchase-orders/${ti.po_id}`} className="btn btn-secondary btn-sm">View PO</Link>}
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
-        <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+        <a href={`/api/tax-invoices/${ti.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
+          <Printer className="w-4 h-4" /> Download PDF
+        </a>
       </div>}>
       <div className="card card-body w-full print-page">
         <DocumentHeader title="TAX INVOICE" docNumber={ti.tax_invoice_number} docDate={formatDate(ti.invoice_date)} />

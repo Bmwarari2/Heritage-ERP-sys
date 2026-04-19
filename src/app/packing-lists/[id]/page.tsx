@@ -181,7 +181,10 @@ function PLContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
         {pl.po_id && <Link href={`/purchase-orders/${pl.po_id}`} className="btn btn-secondary btn-sm">View PO</Link>}
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
-        <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+        <a href={`/api/packing-lists/${pl.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
+          <Printer className="w-4 h-4" /> Download PDF
+        </a>
       </div>}>
       <div className="card card-body w-full print-page">
         <DocumentHeader title="PACKING LIST"

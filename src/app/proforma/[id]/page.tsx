@@ -49,7 +49,10 @@ export default function ProformaDetailPage() {
             <Link href={`/rfq/${pi.rfq_id}`} className="btn btn-secondary btn-sm">View RFQ</Link>
           )}
           <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}><Edit2 className="w-4 h-4" /> Edit</button>
-          <button className="btn btn-primary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Download PDF</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+          <a href={`/api/proforma/${pi.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
+            <Printer className="w-4 h-4" /> Download PDF
+          </a>
         </div>
       }
     >
