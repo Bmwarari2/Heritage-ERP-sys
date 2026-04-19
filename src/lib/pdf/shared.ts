@@ -16,6 +16,9 @@ export const A4_HEIGHT = 841.89
 
 export const MARGIN_X = 50
 export const MARGIN_TOP = 60
+// Reserved vertical space on pages 2+ to keep content clear of the
+// Heritage logo printed in the top band of the branded A4 background.
+export const MARGIN_TOP_CONTINUED = 120
 export const MARGIN_BOTTOM = 50
 export const CONTENT_WIDTH = A4_WIDTH - MARGIN_X * 2
 
@@ -112,7 +115,7 @@ export function createDocument(meta: { title: string; subject: string }): DocSet
 export function ensureSpace(doc: PDFKit.PDFDocument, y: number, needed: number): number {
   if (y + needed > A4_HEIGHT - MARGIN_BOTTOM) {
     doc.addPage()
-    return MARGIN_TOP
+    return MARGIN_TOP_CONTINUED
   }
   return y
 }
@@ -306,7 +309,7 @@ export function drawTable(doc: PDFKit.PDFDocument, opts: TableOpts): number {
     const rowH = computeRowHeight(doc, opts.cols, values)
     if (y + rowH > A4_HEIGHT - MARGIN_BOTTOM) {
       doc.addPage()
-      y = MARGIN_TOP
+      y = MARGIN_TOP_CONTINUED
       y = drawTableHeader(doc, MARGIN_X, y, opts.cols)
     }
     y = drawTableRow(doc, MARGIN_X, y, opts.cols, values)

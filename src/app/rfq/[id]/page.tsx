@@ -7,6 +7,7 @@ import { Edit2, Printer, FileText, ArrowLeft, Loader2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
 import RFQForm from '@/components/rfq/RFQForm'
+import { printPdf } from '@/lib/print-pdf'
 import { formatDate } from '@/lib/utils'
 import type { RFQ } from '@/types'
 
@@ -53,7 +54,7 @@ export default function RFQDetailPage() {
           <Link href={`/proforma/new?rfq_id=${rfq.id}`} className="btn btn-primary btn-sm">
             <FileText className="w-4 h-4" /> Create Proforma
           </Link>
-          <button className="btn btn-secondary btn-sm" onClick={() => window.print()}>
+          <button className="btn btn-secondary btn-sm" onClick={() => printPdf(`/api/rfq/${rfq.id}/pdf`)}>
             <Printer className="w-4 h-4" /> Print
           </button>
           <a
@@ -68,16 +69,16 @@ export default function RFQDetailPage() {
       }
     >
       {/* ---- Print Layout ---- */}
-      <div className="card card-body w-full print-page rfq-print-page" id="rfq-print">
-        <div className="rfq-print-inner">
+      <div className="card card-body w-full print-page doc-print-page" id="rfq-print">
+        <div className="doc-print-inner">
           {/* Header: Title + reference block (the background image already
               carries the Heritage logo in the top-right corner). */}
-          <div className="rfq-header">
-            <div className="rfq-header-left">
-              <p className="rfq-doc-label">Document</p>
-              <h1 className="rfq-title">REQUEST FOR QUOTATION</h1>
+          <div className="doc-header">
+            <div className="doc-header-left">
+              <p className="doc-doc-label">Document</p>
+              <h1 className="doc-title">REQUEST FOR QUOTATION</h1>
 
-              <dl className="rfq-ref-box">
+              <dl className="doc-ref-box">
                 <dt>Doc Number</dt>
                 <dd className="font-mono">{rfq.rfq_number}</dd>
 
@@ -112,8 +113,8 @@ export default function RFQDetailPage() {
           </div>
 
           {/* Address Grid — 2x2 */}
-          <section className="rfq-address-grid">
-            <div className="rfq-address-cell">
+          <section className="doc-address-grid">
+            <div className="doc-address-cell">
               <p className="section-title">Invoicing Details</p>
               <p className="font-medium">{rfq.buyer_company}</p>
               {rfq.buyer_site && <p>{rfq.buyer_site}</p>}
@@ -121,7 +122,7 @@ export default function RFQDetailPage() {
               {rfq.buyer_country && <p>{rfq.buyer_country}</p>}
             </div>
 
-            <div className="rfq-address-cell">
+            <div className="doc-address-cell">
               <p className="section-title">Delivery Address</p>
               <p className="font-medium">{rfq.delivery_company}</p>
               {rfq.delivery_street && <p>{rfq.delivery_street}</p>}
@@ -129,9 +130,9 @@ export default function RFQDetailPage() {
               {rfq.delivery_country && <p>{rfq.delivery_country}</p>}
             </div>
 
-            <hr className="rfq-address-divider" />
+            <hr className="doc-address-divider" />
 
-            <div className="rfq-address-cell">
+            <div className="doc-address-cell">
               <p className="section-title">Contact Details</p>
               {rfq.contact_person && <p><span className="font-medium">Contact:</span> {rfq.contact_person}</p>}
               {rfq.contact_email && <p>{rfq.contact_email}</p>}
@@ -139,7 +140,7 @@ export default function RFQDetailPage() {
               {rfq.contact_fax && <p><span className="font-medium">Fax:</span> {rfq.contact_fax}</p>}
             </div>
 
-            <div className="rfq-address-cell">
+            <div className="doc-address-cell">
               <p className="section-title">Vendor Details</p>
               <p className="font-medium">{rfq.vendor_name}</p>
               {rfq.vendor_address_line1 && <p>{rfq.vendor_address_line1}</p>}
@@ -155,7 +156,7 @@ export default function RFQDetailPage() {
 
           {/* Line Items — heading stays with the table */}
           {items.length > 0 && (
-            <section className="rfq-items">
+            <section className="doc-items">
               <p className="section-title">Items</p>
               <div className="overflow-x-auto">
                 <table className="data-table text-xs">

@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { Edit2, Printer, ArrowLeft, Loader2, Package, CheckSquare, Square, AlertTriangle, ExternalLink } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
-import DocumentHeader from '@/components/shared/DocumentHeader'
 import POForm from '@/components/po/POForm'
+import { printPdf } from '@/lib/print-pdf'
 import { formatDate, formatCurrency, cn } from '@/lib/utils'
 import type { PurchaseOrder, POItem } from '@/types'
 
@@ -151,7 +151,7 @@ export default function PODetailPage() {
           <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
           {po.rfq_id && <Link href={`/rfq/${po.rfq_id}`} className="btn btn-secondary btn-sm">View RFQ</Link>}
           <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}><Edit2 className="w-4 h-4" /> Edit</button>
-          <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => printPdf(`/api/purchase-orders/${po.id}/pdf`)}><Printer className="w-4 h-4" /> Print</button>
           <a href={`/api/purchase-orders/${po.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
             <Printer className="w-4 h-4" /> Download PDF
           </a>
@@ -160,61 +160,67 @@ export default function PODetailPage() {
     >
       <div className="space-y-6 w-full">
         {/* ---- Print Layout ---- */}
-        <div className="card card-body print-page">
-          <DocumentHeader
-            title="PURCHASE ORDER"
-            docNumber={po.po_number}
-            docDate={formatDate(po.po_date)}
-            extra={
-              <div className="text-sm text-gray-600 mt-1 space-y-0.5">
-                {po.currency && <p><span className="font-medium">Currency:</span> {po.currency}</p>}
-                {po.inco_terms && <p><span className="font-medium">Inco Terms:</span> {po.inco_terms}</p>}
-                {po.payment_terms && <p><span className="font-medium">Payment Terms:</span> {po.payment_terms}</p>}
-                {po.your_reference && <p><span className="font-medium">Reference:</span> {po.your_reference}</p>}
+        <div className="card card-body w-full print-page doc-print-page">
+          <div className="doc-print-inner">
+            <div className="doc-header">
+              <div className="doc-header-left">
+                <p className="doc-doc-label">Document</p>
+                <h1 className="doc-title">Purchase Order</h1>
+                <dl className="doc-ref-box">
+                  <dt>PO Number</dt>
+                  <dd className="font-mono">{po.po_number}</dd>
+                  <dt>Date</dt>
+                  <dd>{formatDate(po.po_date)}</dd>
+                  {po.currency && (<><dt>Currency</dt><dd>{po.currency}</dd></>)}
+                  {po.inco_terms && (<><dt>Inco Terms</dt><dd>{po.inco_terms}</dd></>)}
+                  {po.payment_terms && (<><dt>Payment Terms</dt><dd>{po.payment_terms}</dd></>)}
+                  {po.your_reference && (<><dt>Your Reference</dt><dd>{po.your_reference}</dd></>)}
+                </dl>
               </div>
-            }
-          />
+            </div>
 
-          <div className="mb-4 no-print"><StatusBadge status={po.status} /></div>
+            <div className="mb-5 no-print"><StatusBadge status={po.status} /></div>
 
-          {/* Addresses */}
-          <div className="grid grid-cols-3 gap-6 mb-6 text-sm">
-            <div>
-              <p className="section-title">Shipping Address</p>
-              <p className="font-medium">{po.ship_to_company ?? po.delivery_address}</p>
-              {po.ship_to_po_box && <p>PO Box {po.ship_to_po_box}</p>}
-              {po.ship_to_town && <p>{po.ship_to_town} {po.ship_to_post_code}</p>}
-              {po.ship_to_country && <p>{po.ship_to_country}</p>}
-            </div>
-            <div>
-              <p className="section-title">Vendor (Heritage)</p>
-              <p className="font-medium">{po.vendor_name}</p>
-              {po.vendor_city && <p>{po.vendor_city} {po.vendor_post_code}</p>}
-              {po.vendor_country && <p>{po.vendor_country}</p>}
-              {po.vendor_email && <p>{po.vendor_email}</p>}
-            </div>
-            <div>
-              <p className="section-title">Billing Address</p>
-              <p className="font-medium">{po.bill_to_company}</p>
-              {po.bill_to_site && <p>{po.bill_to_site}</p>}
-              {po.bill_to_town && <p>{po.bill_to_town}</p>}
-              {po.bill_to_country && <p>{po.bill_to_country}</p>}
-              {po.billing_email && <p>{po.billing_email}</p>}
-            </div>
-          </div>
+            {/* 2x2 address grid (Shipping / Vendor, Billing / Meta) */}
+            <section className="doc-address-grid">
+              <div className="doc-address-cell">
+                <p className="section-title">Shipping Address</p>
+                <p className="font-medium">{po.ship_to_company ?? po.delivery_address}</p>
+                {po.ship_to_po_box && <p>PO Box {po.ship_to_po_box}</p>}
+                {po.ship_to_town && <p>{po.ship_to_town} {po.ship_to_post_code}</p>}
+                {po.ship_to_country && <p>{po.ship_to_country}</p>}
+              </div>
 
-          {/* Additional info */}
-          {(po.created_by_buyer || po.sales_person || po.mode_of_transport) && (
-            <div className="grid grid-cols-4 gap-4 mb-6 text-xs bg-gray-50 rounded-lg p-3">
-              {po.created_by_buyer && <div><span className="font-semibold text-gray-500 uppercase">Created By</span><p>{po.created_by_buyer}</p></div>}
-              {po.sales_person && <div><span className="font-semibold text-gray-500 uppercase">Sales Person</span><p>{po.sales_person}</p></div>}
-              {po.mode_of_transport && <div><span className="font-semibold text-gray-500 uppercase">Transport</span><p>{po.mode_of_transport}</p></div>}
-              {po.your_reference && <div><span className="font-semibold text-gray-500 uppercase">Your Ref</span><p>{po.your_reference}</p></div>}
-            </div>
-          )}
+              <div className="doc-address-cell">
+                <p className="section-title">Vendor (Heritage)</p>
+                <p className="font-medium">{po.vendor_name}</p>
+                {po.vendor_city && <p>{po.vendor_city} {po.vendor_post_code}</p>}
+                {po.vendor_country && <p>{po.vendor_country}</p>}
+                {po.vendor_email && <p>{po.vendor_email}</p>}
+              </div>
+
+              <hr className="doc-address-divider" />
+
+              <div className="doc-address-cell">
+                <p className="section-title">Billing Address</p>
+                <p className="font-medium">{po.bill_to_company}</p>
+                {po.bill_to_site && <p>{po.bill_to_site}</p>}
+                {po.bill_to_town && <p>{po.bill_to_town}</p>}
+                {po.bill_to_country && <p>{po.bill_to_country}</p>}
+                {po.billing_email && <p>{po.billing_email}</p>}
+              </div>
+
+              <div className="doc-address-cell">
+                <p className="section-title">Order Details</p>
+                {po.created_by_buyer && <p><span className="font-medium">Created By:</span> {po.created_by_buyer}</p>}
+                {po.sales_person && <p><span className="font-medium">Sales Person:</span> {po.sales_person}</p>}
+                {po.mode_of_transport && <p><span className="font-medium">Transport:</span> {po.mode_of_transport}</p>}
+                {po.your_reference && <p><span className="font-medium">Your Ref:</span> {po.your_reference}</p>}
+              </div>
+            </section>
 
           {/* Line Items */}
-          <div className="mb-4">
+          <section className="doc-items">
             <p className="section-title">Items</p>
             <div className="overflow-x-auto">
               <table className="data-table text-xs">
@@ -374,7 +380,7 @@ export default function PODetailPage() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </section>
 
           {/* Totals */}
           <div className="flex justify-end mb-4">
@@ -400,6 +406,7 @@ export default function PODetailPage() {
               <p className="text-gray-700">{po.instructions_to_vendor}</p>
             </div>
           )}
+          </div>
         </div>
 
         {/* ---- Dispatch Actions (screen only) ---- */}
