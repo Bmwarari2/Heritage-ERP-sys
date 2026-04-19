@@ -18,7 +18,7 @@ export const MARGIN_X = 50
 export const MARGIN_TOP = 60
 // Reserved vertical space on pages 2+ to keep content clear of the
 // Heritage logo printed in the top band of the branded A4 background.
-export const MARGIN_TOP_CONTINUED = 120
+export const MARGIN_TOP_CONTINUED = 170
 export const MARGIN_BOTTOM = 50
 export const CONTENT_WIDTH = A4_WIDTH - MARGIN_X * 2
 
