@@ -14,6 +14,7 @@ type FormItem = Partial<RFQItem> & {
 interface RFQFormProps {
   initialData?: ParsedRFQ | null
   existing?: RFQ | null
+  onSaved?: (rfq: RFQ) => void
 }
 
 const EMPTY_ITEM: FormItem = {
@@ -27,7 +28,7 @@ const EMPTY_ITEM: FormItem = {
   unit: 'EA',
 }
 
-export default function RFQForm({ initialData, existing }: RFQFormProps) {
+export default function RFQForm({ initialData, existing, onSaved }: RFQFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [saving, setSaving] = useState(false)
@@ -146,6 +147,7 @@ export default function RFQForm({ initialData, existing }: RFQFormProps) {
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Save failed'); setSaving(false); return }
+      if (existing && onSaved) { onSaved(data); setSaving(false); return }
       router.push(`/rfq/${data.id}`)
     } catch {
       setError('Network error')
