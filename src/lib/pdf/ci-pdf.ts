@@ -35,6 +35,7 @@ export async function generateCIPDF(ci: CommercialInvoice): Promise<Buffer> {
   if (ci.terms_of_sale) refRows.push({ label: 'Terms of Sale', value: ci.terms_of_sale })
   if (ci.country_of_origin) refRows.push({ label: 'Country of Origin', value: ci.country_of_origin })
   if (ci.final_destination) refRows.push({ label: 'Final Destination', value: ci.final_destination })
+  if (ci.notify_party) refRows.push({ label: 'Notify Party', value: ci.notify_party })
 
   let y = drawDocumentHeader(doc, MARGIN_TOP, 'Commercial Invoice', refRows)
 

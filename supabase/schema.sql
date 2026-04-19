@@ -118,6 +118,8 @@ CREATE TABLE IF NOT EXISTS public.proforma_invoices (
   incoterm TEXT,
   incoterm_country TEXT,
   currency TEXT DEFAULT 'GBP',
+  lead_time TEXT,
+  payment_terms TEXT,
 
   -- Vendor (auto-populated)
   vendor_name TEXT DEFAULT 'Heritage Global Solutions Ltd',

@@ -22,11 +22,13 @@ function PLContent() {
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState(isNew)
 
+  const defaultNotes = 'PLEASE NOTIFY US IMMEDIATELY IF SHIPMENT CONTAINS ERRORS!\nContact: Eric, Tel: +447428777090'
+
   const [form, setForm] = useState({
     po_id: poId ?? '', batch_id: batchId ?? '',
     customer_po_number: '', our_order_number: '',
     final_destination: '', shipped_via: '', sales_person: '',
-    ship_to_address: '', status: 'draft' as string,
+    ship_to_address: '', notes: defaultNotes, status: 'draft' as string,
   })
 
   const [items, setItems] = useState([{ item_number: '1', quantity: 1, description: '' }])
@@ -43,7 +45,7 @@ function PLContent() {
           customer_po_number: data.customer_po_number ?? '', our_order_number: data.our_order_number ?? '',
           final_destination: data.final_destination ?? '', shipped_via: data.shipped_via ?? '',
           sales_person: data.sales_person ?? '', ship_to_address: data.ship_to_address ?? '',
-          status: data.status,
+          notes: data.notes ?? '', status: data.status,
         })
         setItems(data.packing_list_items ?? [{ item_number: '1', quantity: 1, description: '' }])
         setBoxes(data.packing_list_boxes?.length > 0 ? data.packing_list_boxes : [{ box_number: 1, box_type: 'Cardboard', dimension_l: 0, dimension_w: 0, dimension_h: 0, gross_weight: 0, notes: '' }])
@@ -142,6 +144,12 @@ function PLContent() {
             </table>
           </div>
 
+          {/* Notes */}
+          <div className="card card-body">
+            <label className="form-label">Notes</label>
+            <textarea className="form-textarea" rows={3} value={form.notes} onChange={e => setField('notes', e.target.value)} />
+          </div>
+
           {/* Boxes */}
           <div className="card">
             <div className="card-header">
@@ -233,6 +241,13 @@ function PLContent() {
               </table>
             </div>
           </section>
+
+          {pl.notes && (
+            <div className="text-sm mt-4">
+              <p className="section-title">Notes</p>
+              <p className="text-slate-700 whitespace-pre-line leading-relaxed">{pl.notes}</p>
+            </div>
+          )}
 
           {pl.packing_list_boxes && pl.packing_list_boxes.length > 0 && (
             <section className="doc-items">

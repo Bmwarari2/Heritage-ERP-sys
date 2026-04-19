@@ -33,6 +33,8 @@ export async function generateProformaPDF(pi: ProformaInvoice): Promise<Buffer> 
   const refRfq = (pi.rfqs as RFQ | undefined)?.rfq_number
   if (refRfq) refRows.push({ label: 'Ref RFQ', value: refRfq })
   if (pi.currency) refRows.push({ label: 'Currency', value: pi.currency })
+  if (pi.lead_time) refRows.push({ label: 'Lead Time (ARO)', value: pi.lead_time })
+  if (pi.payment_terms) refRows.push({ label: 'Payment Terms', value: pi.payment_terms })
 
   let y = drawDocumentHeader(doc, MARGIN_TOP, 'Proforma Invoice', refRows)
 
