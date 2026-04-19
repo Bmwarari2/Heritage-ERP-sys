@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Save, Loader2, ArrowLeft, Trash2, Edit2, Building2, Mail, Phone, MapPin, FileText, ShoppingCart, Receipt, Package } from 'lucide-react'
+import { Save, Loader2, ArrowLeft, Trash2, Edit2, Building2, Mail, Phone, MapPin, FileText, ShoppingCart, Receipt, Upload } from 'lucide-react'
 import Link from 'next/link'
 import PageWrapper from '@/components/shared/PageWrapper'
 import type { Client } from '@/types'
@@ -19,7 +19,7 @@ export default function ClientDetailPage() {
 
   const [form, setForm] = useState({
     name: '', customer_id: '', contact_person: '', email: '', phone: '',
-    address: '', country: '', vat_number: '', notes: '',
+    address: '', billing_address: '', country: '', vat_number: '', notes: '',
   })
 
   useEffect(() => {
@@ -32,6 +32,7 @@ export default function ClientDetailPage() {
         email: data.email ?? '',
         phone: data.phone ?? '',
         address: data.address ?? '',
+        billing_address: data.billing_address ?? '',
         country: data.country ?? '',
         vat_number: data.vat_number ?? '',
         notes: data.notes ?? '',
@@ -110,9 +111,15 @@ export default function ClientDetailPage() {
                   <input className="form-input" value={form.country} onChange={e => setField('country', e.target.value)} />
                 </div>
               </div>
-              <div>
-                <label className="form-label">Address</label>
-                <textarea className="form-textarea" rows={3} value={form.address} onChange={e => setField('address', e.target.value)} />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label">Shipping / Physical Address</label>
+                  <textarea className="form-textarea" rows={3} value={form.address} onChange={e => setField('address', e.target.value)} />
+                </div>
+                <div>
+                  <label className="form-label">Billing Address <span className="text-xs text-gray-400 font-normal">(leave blank to use shipping)</span></label>
+                  <textarea className="form-textarea" rows={3} value={form.billing_address} onChange={e => setField('billing_address', e.target.value)} />
+                </div>
               </div>
               <div>
                 <label className="form-label">VAT / Tax Number</label>
@@ -190,8 +197,15 @@ export default function ClientDetailPage() {
               </div>
             )}
             {client.address && (
-              <div className="col-span-full text-gray-700 whitespace-pre-line bg-gray-50 rounded-lg p-3 text-sm">
+              <div className="text-gray-700 whitespace-pre-line bg-gray-50 rounded-lg p-3 text-sm">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Shipping Address</p>
                 {client.address}
+              </div>
+            )}
+            {client.billing_address && (
+              <div className="text-gray-700 whitespace-pre-line bg-gray-50 rounded-lg p-3 text-sm">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Billing Address</p>
+                {client.billing_address}
               </div>
             )}
             {client.notes && (
@@ -206,21 +220,31 @@ export default function ClientDetailPage() {
         {/* Quick actions to create linked documents */}
         <div className="card">
           <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Create Document for this Client</h3></div>
-          <div className="card-body grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="card-body grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             <Link href={`/rfq/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
               className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
               <FileText className="w-6 h-6 text-[#1E3A5F]" />
               <span className="text-xs font-medium text-gray-700">New RFQ</span>
             </Link>
-            <Link href={`/proforma/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
+            <Link href={`/rfq/new?mode=upload&client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
               className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
-              <FileText className="w-6 h-6 text-[#3A6EA5]" />
-              <span className="text-xs font-medium text-gray-700">New Proforma</span>
+              <Upload className="w-6 h-6 text-[#1E3A5F]" />
+              <span className="text-xs font-medium text-gray-700">Upload RFQ PDF</span>
             </Link>
             <Link href={`/purchase-orders/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
               className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
               <ShoppingCart className="w-6 h-6 text-[#1E3A5F]" />
               <span className="text-xs font-medium text-gray-700">New PO</span>
+            </Link>
+            <Link href={`/purchase-orders/new?mode=upload&client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
+              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
+              <Upload className="w-6 h-6 text-[#1E3A5F]" />
+              <span className="text-xs font-medium text-gray-700">Upload PO PDF</span>
+            </Link>
+            <Link href={`/proforma/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
+              className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">
+              <FileText className="w-6 h-6 text-[#3A6EA5]" />
+              <span className="text-xs font-medium text-gray-700">New Proforma</span>
             </Link>
             <Link href={`/commercial-invoices/new?client_id=${client.id}&client_name=${encodeURIComponent(client.name)}`}
               className="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-[#3A6EA5] hover:bg-amber-50 transition-colors text-center">

@@ -250,6 +250,13 @@ function drawAddressCell(
 
   let ly = y + 30
   cell.lines.forEach((ln, idx) => {
+    if (ln === CELL_SEPARATOR) {
+      ly += 3
+      doc.lineWidth(0.5).strokeColor(BORDER_BLUE)
+         .moveTo(x + 10, ly).lineTo(x + w - 10, ly).stroke()
+      ly += 5
+      return
+    }
     doc
       .fillColor(idx === 0 ? SLATE_800 : SLATE_700)
       .font(idx === 0 ? 'Helvetica-Bold' : 'Helvetica')
@@ -258,6 +265,8 @@ function drawAddressCell(
     ly = doc.y + 1
   })
 }
+
+export const CELL_SEPARATOR = '\u0001___SEP___\u0001'
 
 export function drawCell(
   doc: PDFKit.PDFDocument,

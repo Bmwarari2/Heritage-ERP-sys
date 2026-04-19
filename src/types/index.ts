@@ -36,6 +36,7 @@ export interface Client {
   email: string | null
   phone: string | null
   address: string | null
+  billing_address: string | null
   country: string | null
   vat_number: string | null
   notes: string | null
