@@ -45,6 +45,7 @@ export default function Process() {
 
         <div style={{ position: 'relative' }}>
           <div
+            className="process-line"
             style={{
               position: 'absolute',
               top: 20,

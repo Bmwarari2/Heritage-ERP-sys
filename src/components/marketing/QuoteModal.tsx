@@ -297,7 +297,10 @@ export default function QuoteModal({ open, onClose }: QuoteModalProps) {
           </div>
         </aside>
 
-        <div style={{ padding: 40, display: 'flex', flexDirection: 'column', minHeight: 560 }}>
+        <div
+          className="quote-body"
+          style={{ padding: 40, display: 'flex', flexDirection: 'column', minHeight: 560 }}
+        >
           <div
             style={{
               display: 'flex',
@@ -366,6 +369,7 @@ export default function QuoteModal({ open, onClose }: QuoteModalProps) {
                       for anything not listed.
                     </p>
                     <div
+                      className="quote-category-grid"
                       style={{
                         display: 'grid',
                         gridTemplateColumns: '1fr 1fr',
@@ -456,6 +460,7 @@ export default function QuoteModal({ open, onClose }: QuoteModalProps) {
                       How do we reach you?
                     </h3>
                     <div
+                      className="quote-contact-grid"
                       style={{
                         marginTop: 24,
                         display: 'grid',
@@ -488,6 +493,7 @@ export default function QuoteModal({ open, onClose }: QuoteModalProps) {
                       Review your request. You&apos;ll get a reply within 48 hours.
                     </p>
                     <div
+                      className="quote-review-grid"
                       style={{
                         marginTop: 24,
                         padding: 20,

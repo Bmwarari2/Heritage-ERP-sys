@@ -273,6 +273,7 @@ export default function Products({ onQuote }: ProductsProps) {
         </p>
 
         <div
+          className="products-filter-row"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -282,7 +283,7 @@ export default function Products({ onQuote }: ProductsProps) {
             gap: 16,
           }}
         >
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div className="chip-scroll" style={{ display: 'flex', gap: 4, flexWrap: 'nowrap' }}>
             {tags.map(t => (
               <button
                 key={t}
