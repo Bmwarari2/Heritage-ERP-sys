@@ -106,6 +106,7 @@ export default function Nav({ onNav, onQuote }: NavProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Link
             href="/login"
+            aria-label="Open ERP Portal"
             style={{ fontSize: 12, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}
           >
             <span
@@ -117,10 +118,18 @@ export default function Nav({ onNav, onQuote }: NavProps) {
                 display: 'inline-block',
               }}
             />
-            ERP Portal
+            <span className="nav-erp-label">ERP Portal</span>
           </Link>
-          <button className="hm-btn hm-btn-primary" onClick={onQuote}>
+          <button className="hm-btn hm-btn-primary nav-cta-full" onClick={onQuote}>
             Request a quote <span className="arrow">→</span>
+          </button>
+          <button
+            className="hm-btn hm-btn-primary nav-cta-compact"
+            onClick={onQuote}
+            style={{ display: 'none', padding: '10px 14px', fontSize: 12 }}
+            aria-label="Request a quote"
+          >
+            Quote <span className="arrow">→</span>
           </button>
         </div>
       </div>

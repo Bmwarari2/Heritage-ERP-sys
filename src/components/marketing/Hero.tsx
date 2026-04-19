@@ -14,7 +14,13 @@ export default function Hero({ onQuote, onNav }: HeroProps) {
   return (
     <section
       id="top"
-      style={{ paddingTop: 140, paddingBottom: 60, minHeight: '100vh', position: 'relative', overflow: 'hidden' }}
+      style={{
+        paddingTop: 'clamp(100px, 14vw, 140px)',
+        paddingBottom: 60,
+        minHeight: '100vh',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
     >
       <div
         style={{
@@ -33,6 +39,7 @@ export default function Hero({ onQuote, onNav }: HeroProps) {
 
       <div className="hm-container" style={{ position: 'relative', zIndex: 2 }}>
         <div
+          className="hero-meta-row"
           style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -40,10 +47,13 @@ export default function Hero({ onQuote, onNav }: HeroProps) {
             paddingBottom: 24,
             marginBottom: 40,
             borderBottom: '1px solid var(--line)',
+            gap: 16,
+            flexWrap: 'wrap',
           }}
         >
           <div className="eyebrow">Heritage Global Solutions — est. United Kingdom</div>
           <div
+            className="hero-meta-right"
             style={{
               display: 'flex',
               gap: 24,
@@ -52,6 +62,7 @@ export default function Hero({ onQuote, onNav }: HeroProps) {
               letterSpacing: '0.15em',
               color: 'var(--muted)',
               textTransform: 'uppercase',
+              flexWrap: 'wrap',
             }}
           >
             <span>UK · USA · EU · CN · AU</span>
@@ -96,7 +107,7 @@ export default function Hero({ onQuote, onNav }: HeroProps) {
               point of accountability.
             </p>
 
-            <div style={{ display: 'flex', gap: 12, marginTop: 40, flexWrap: 'wrap' }}>
+            <div className="hero-cta-row" style={{ display: 'flex', gap: 12, marginTop: 40, flexWrap: 'wrap' }}>
               <button className="hm-btn hm-btn-primary" onClick={onQuote}>
                 Request a quote <span className="arrow">→</span>
               </button>
@@ -106,6 +117,7 @@ export default function Hero({ onQuote, onNav }: HeroProps) {
             </div>
 
             <div
+              className="hero-stats"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',

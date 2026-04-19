@@ -63,6 +63,7 @@ export default function About() {
             </p>
 
             <div
+              className="about-pillars"
               style={{
                 marginTop: 48,
                 display: 'grid',
@@ -84,7 +85,7 @@ export default function About() {
             </div>
           </div>
 
-          <aside style={{ position: 'sticky', top: 100 }}>
+          <aside className="about-aside" style={{ position: 'sticky', top: 100 }}>
             <div className="placeholder" data-label="Operations floor · Preston" style={{ height: 320 }} />
             <div
               style={{

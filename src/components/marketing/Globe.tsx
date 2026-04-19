@@ -55,12 +55,22 @@ export default function Globe({ activeMarket, onMarketHover }: GlobeProps) {
     return { x, y, z }
   }
 
+  const size = R * 2 + 60
   return (
-    <div style={{ position: 'relative', width: R * 2 + 60, height: R * 2 + 60, margin: '0 auto' }}>
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: size,
+        aspectRatio: '1 / 1',
+        margin: '0 auto',
+      }}
+    >
       <svg
-        viewBox={`${-R - 30} ${-R - 30} ${R * 2 + 60} ${R * 2 + 60}`}
-        width={R * 2 + 60}
-        height={R * 2 + 60}
+        viewBox={`${-R - 30} ${-R - 30} ${size} ${size}`}
+        width="100%"
+        height="100%"
+        preserveAspectRatio="xMidYMid meet"
         style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
       >
         <circle cx="0" cy="0" r={R + 16} fill="none" stroke="var(--line)" strokeWidth="0.5" strokeDasharray="2 4" />
@@ -84,9 +94,10 @@ export default function Globe({ activeMarket, onMarketHover }: GlobeProps) {
       </svg>
 
       <svg
-        viewBox={`${-R - 30} ${-R - 30} ${R * 2 + 60} ${R * 2 + 60}`}
-        width={R * 2 + 60}
-        height={R * 2 + 60}
+        viewBox={`${-R - 30} ${-R - 30} ${size} ${size}`}
+        width="100%"
+        height="100%"
+        preserveAspectRatio="xMidYMid meet"
         style={{ position: 'absolute', inset: 0 }}
       >
         <defs>
