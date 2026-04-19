@@ -4,10 +4,13 @@ import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
 
 const FULLSCREEN_PATHS = ['/login', '/account/change-password']
+const FULLSCREEN_EXACT = new Set(['/'])
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const fullscreen = FULLSCREEN_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
+  const fullscreen =
+    FULLSCREEN_EXACT.has(pathname) ||
+    FULLSCREEN_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (fullscreen) {
     return <>{children}</>

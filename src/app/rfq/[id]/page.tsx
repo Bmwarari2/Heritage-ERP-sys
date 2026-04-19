@@ -32,7 +32,7 @@ export default function RFQDetailPage() {
       <PageWrapper title={`Edit RFQ ${rfq.rfq_number}`} actions={
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancel Edit</button>
       }>
-        <RFQForm existing={rfq} />
+        <RFQForm existing={rfq} onSaved={(updated) => { setRfq(updated); setEditing(false) }} />
       </PageWrapper>
     )
   }

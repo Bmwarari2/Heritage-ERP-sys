@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils'
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'
 
 const navItems = [
-  { label: 'Dashboard',          href: '/',                    icon: LayoutDashboard, group: 'Overview' },
+  { label: 'Dashboard',          href: '/dashboard',           icon: LayoutDashboard, group: 'Overview' },
   { label: 'Clients',            href: '/clients',             icon: Users,           group: 'Overview' },
   { label: 'RFQ',                href: '/rfq',                 icon: ClipboardList,   group: 'Documents' },
   { label: 'Proforma Invoices',  href: '/proforma',            icon: FileText,        group: 'Documents' },

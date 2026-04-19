@@ -1,7 +1,8 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PUBLIC_PATHS = ['/login', '/api/auth/signin', '/api/auth/signout', '/api/setup', '/api/health']
+const PUBLIC_PATHS = ['/login', '/api/auth/signin', '/api/auth/signout', '/api/setup', '/api/health', '/api/leads']
+const PUBLIC_EXACT = new Set(['/'])
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -31,7 +32,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const isPublic = PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
+  const isPublic = PUBLIC_EXACT.has(pathname) || PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (!user && !isPublic) {
     const loginUrl = new URL('/login', request.url)
@@ -40,7 +41,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && pathname === '/login') {
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // Force password change if profile flag is set

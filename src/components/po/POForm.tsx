@@ -16,6 +16,7 @@ interface POFormProps {
   rfq?: RFQ | null
   existing?: PurchaseOrder | null
   parsedData?: ParsedPO | null
+  onSaved?: (po: PurchaseOrder) => void
 }
 
 const EMPTY_CLIENT_ITEM: FormItem = {
@@ -30,7 +31,7 @@ const EMPTY_STANDALONE_ITEM: FormItem = {
   net_price: 0, per_quantity: 1, net_amount: 0,
 }
 
-export default function POForm({ poType, rfq, existing, parsedData }: POFormProps) {
+export default function POForm({ poType, rfq, existing, parsedData, onSaved }: POFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [saving, setSaving] = useState(false)
@@ -205,6 +206,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Save failed'); setSaving(false); return }
+      if (existing && onSaved) { onSaved(data); setSaving(false); return }
       router.push(`/purchase-orders/${data.id}`)
     } catch {
       setError('Network error')

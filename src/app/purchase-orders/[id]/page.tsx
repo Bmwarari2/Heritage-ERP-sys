@@ -114,7 +114,7 @@ export default function PODetailPage() {
     return (
       <PageWrapper title={`Edit PO ${po.po_number}`}
         actions={<button className="btn btn-secondary btn-sm" onClick={() => setEditing(false)}>Cancel Edit</button>}>
-        <POForm poType={po.po_type} existing={po} />
+        <POForm poType={po.po_type} existing={po} onSaved={(updated) => { setPo(updated); setEditing(false) }} />
       </PageWrapper>
     )
   }
