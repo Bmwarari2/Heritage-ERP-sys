@@ -80,14 +80,14 @@ export async function generatePOPDF(po: PurchaseOrder): Promise<Buffer> {
     if (po.po_type === 'client') {
       const cols: TableCol[] = [
         { label: '#',            w: 22, align: 'left',  mono: true },
-        { label: 'Material',     w: 65, align: 'left',  mono: true },
-        { label: 'Description',  w: 150, align: 'left' },
-        { label: 'OEM/Part',     w: 75, align: 'left' },
-        { label: 'Qty',          w: 35, align: 'right' },
-        { label: 'Unit',         w: 30, align: 'left'  },
-        { label: 'Delivery',     w: 55, align: 'left'  },
+        { label: 'Material',     w: 60, align: 'left',  mono: true },
+        { label: 'Description',  w: 130, align: 'left' },
+        { label: 'OEM/Part',     w: 65, align: 'left' },
+        { label: 'Qty',          w: 30, align: 'right' },
+        { label: 'Unit',         w: 28, align: 'left'  },
+        { label: 'Delivery',     w: 50, align: 'left'  },
         { label: 'Net Price',    w: 50, align: 'right' },
-        { label: 'Net Amount',   w: 60, align: 'right' },
+        { label: 'Net Amount',   w: 55, align: 'right' },
       ]
       const rows = items.map((it: POItem) => [
         it.item_number ?? '',
@@ -103,12 +103,12 @@ export async function generatePOPDF(po: PurchaseOrder): Promise<Buffer> {
       y = drawTable(doc, { startY: y, cols, rows, heading: 'Items' })
     } else {
       const cols: TableCol[] = [
-        { label: '#',           w: 28,  align: 'left',  mono: true },
-        { label: 'Description', w: 250, align: 'left' },
-        { label: 'Qty',         w: 50,  align: 'right' },
-        { label: 'Unit',        w: 40,  align: 'left'  },
+        { label: '#',           w: 25,  align: 'left',  mono: true },
+        { label: 'Description', w: 240, align: 'left' },
+        { label: 'Qty',         w: 45,  align: 'right' },
+        { label: 'Unit',        w: 35,  align: 'left'  },
         { label: 'Unit Price',  w: 65,  align: 'right' },
-        { label: 'Total',       w: 67,  align: 'right' },
+        { label: 'Total',       w: 70,  align: 'right' },
       ]
       const rows = items.map((it: POItem) => [
         it.item_number ?? '',
