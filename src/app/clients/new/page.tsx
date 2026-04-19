@@ -12,7 +12,8 @@ export default function NewClientPage() {
 
   const [form, setForm] = useState({
     name: '', customer_id: '', contact_person: '', email: '', phone: '',
-    address: '', billing_address: '', country: '', vat_number: '', notes: '',
+    address: '', billing_address: '', notify_party: '',
+    country: '', vat_number: '', notes: '',
   })
 
   function setField(key: string, value: string) {
@@ -87,6 +88,10 @@ export default function NewClientPage() {
                 <label className="form-label">Billing Address <span className="text-xs text-gray-400 font-normal">(leave blank to use shipping)</span></label>
                 <textarea className="form-textarea" rows={3} value={form.billing_address} onChange={e => setField('billing_address', e.target.value)} placeholder="Where invoices are sent" />
               </div>
+            </div>
+            <div>
+              <label className="form-label">Notify Party <span className="text-xs text-gray-400 font-normal">(for commercial invoices / shipping docs)</span></label>
+              <textarea className="form-textarea" rows={2} value={form.notify_party} onChange={e => setField('notify_party', e.target.value)} placeholder="Notify party name and address" />
             </div>
             <div>
               <label className="form-label">VAT / Tax Number</label>

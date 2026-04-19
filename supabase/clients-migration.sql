@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS public.clients (
   phone           TEXT,
   address         TEXT,
   billing_address TEXT,
+  notify_party    TEXT,
   country         TEXT,
   vat_number      TEXT,
   notes           TEXT,

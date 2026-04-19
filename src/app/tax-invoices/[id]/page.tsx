@@ -8,7 +8,7 @@ import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
 import { printPdf } from '@/lib/print-pdf'
 import { formatDate, formatCurrency } from '@/lib/utils'
-import type { TaxInvoice } from '@/types'
+import type { TaxInvoice, Client } from '@/types'
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr)
@@ -23,6 +23,7 @@ function TIContent() {
   const isNew = id === 'new'
   const poId = searchParams.get('po_id')
   const batchId = searchParams.get('batch_id')
+  const initialClientId = searchParams.get('client_id') ?? ''
 
   const [ti, setTi] = useState<TaxInvoice | null>(null)
   const [loading, setLoading] = useState(!isNew)
@@ -42,10 +43,33 @@ function TIContent() {
     currency: 'GBP', sales_tax_rate: '0', notes: '', status: 'draft' as string,
     bank_name: '', bank_account_name: 'Heritage Global Solutions Ltd',
     bank_account_number: '', bank_sort_code: '', bank_iban: '', bank_swift: '',
+    client_id: initialClientId,
   })
+  const [clients, setClients] = useState<Client[]>([])
 
   const [items, setItems] = useState([{ item_number: '1', item_description: '', quantity: 1, unit_price: 0 }])
   const [companySettings, setCompanySettings] = useState<Record<string, string> | null>(null)
+
+  // Load clients for the selector
+  useEffect(() => {
+    fetch('/api/clients').then(r => r.json()).then(d => {
+      if (Array.isArray(d)) setClients(d)
+    }).catch(() => {})
+  }, [])
+
+  function applyClient(clientId: string) {
+    const c = clients.find(cl => cl.id === clientId)
+    if (!c) { setForm(f => ({ ...f, client_id: '' })); return }
+    const billing = c.billing_address ?? c.address ?? ''
+    setForm(f => ({
+      ...f,
+      client_id: c.id,
+      customer_name: c.name,
+      customer_id: c.customer_id ?? f.customer_id,
+      customer_address: billing,
+      customer_phone: c.phone ?? f.customer_phone,
+    }))
+  }
 
   // Auto-load company settings to pre-fill VAT/Reg and bank details
   useEffect(() => {
@@ -116,6 +140,7 @@ function TIContent() {
           bank_account_number: data.bank_account_number ?? '',
           bank_sort_code: data.bank_sort_code ?? '', bank_iban: data.bank_iban ?? '',
           bank_swift: data.bank_swift ?? '',
+          client_id: data.client_id ?? '',
         })
         setItems(data.ti_items?.map((i: { item_number: string; item_description: string | null; quantity: number; unit_price: number }) => ({
           item_number: i.item_number, item_description: i.item_description ?? '',
@@ -143,6 +168,7 @@ function TIContent() {
             customer_name: po.bill_to_company ?? po.ship_to_company ?? '',
             customer_address: customerAddr,
             customer_phone: po.vendor_phone ?? '',
+            client_id: po.client_id ?? f.client_id,
             vat_reg_number: s?.vat_reg_number || f.vat_reg_number,
             company_reg_number: s?.company_reg_number || f.company_reg_number,
             bank_name: isUSD ? (s?.usd_bank_name || '') : (s?.gbp_bank_name || ''),
@@ -164,6 +190,7 @@ function TIContent() {
             customer_name: po.bill_to_company ?? po.ship_to_company ?? '',
             customer_address: customerAddr,
             customer_phone: po.vendor_phone ?? '',
+            client_id: po.client_id ?? f.client_id,
           }))
         })
         const batchItems = (batch.dispatch_batch_items ?? [])
@@ -205,7 +232,7 @@ function TIContent() {
 
   async function handleSave() {
     setSaving(true)
-    const payload = { ...form, sales_tax_rate: taxRate, subtotal, sales_tax_amount: taxAmount, total_amount: total, items }
+    const payload = { ...form, client_id: form.client_id || null, sales_tax_rate: taxRate, subtotal, sales_tax_amount: taxAmount, total_amount: total, items }
     const url = isNew ? '/api/tax-invoices' : `/api/tax-invoices/${id}`
     const res = await fetch(url, { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const data = await res.json()
@@ -230,6 +257,15 @@ function TIContent() {
             <div className="card">
               <div className="card-header"><h3 className="font-semibold text-[#1E3A5F]">Bill To</h3></div>
               <div className="card-body space-y-3">
+                {clients.length > 0 && (
+                  <div>
+                    <label className="form-label">Select existing client</label>
+                    <select className="form-select" value={form.client_id} onChange={e => applyClient(e.target.value)}>
+                      <option value="">— type manually —</option>
+                      {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.customer_id ? ` (${c.customer_id})` : ''}</option>)}
+                    </select>
+                  </div>
+                )}
                 <div><label className="form-label">Customer Name</label><input className="form-input" value={form.customer_name} onChange={e => setField('customer_name', e.target.value)} /></div>
                 <div><label className="form-label">Customer ID</label><input className="form-input" value={form.customer_id} onChange={e => setField('customer_id', e.target.value)} /></div>
                 <div><label className="form-label">Address</label><textarea className="form-textarea" rows={2} value={form.customer_address} onChange={e => setField('customer_address', e.target.value)} /></div>

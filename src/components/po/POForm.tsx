@@ -36,7 +36,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [clients, setClients] = useState<Client[]>([])
-  const [selectedClientId, setSelectedClientId] = useState(searchParams.get('client_id') ?? '')
+  const [selectedClientId, setSelectedClientId] = useState(existing?.client_id ?? searchParams.get('client_id') ?? '')
 
   useEffect(() => {
     fetch('/api/clients').then(r => r.json()).then(d => setClients(Array.isArray(d) ? d : [])).catch(() => {})
@@ -46,12 +46,17 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
     setSelectedClientId(clientId)
     const c = clients.find(cl => cl.id === clientId)
     if (!c) return
+    const billing = c.billing_address ?? c.address ?? ''
+    const shipping = c.address ?? ''
     setForm(f => ({
       ...f,
       bill_to_company: c.name,
       ship_to_company: c.name,
       ship_to_country: c.country ?? f.ship_to_country,
       bill_to_country: c.country ?? f.bill_to_country,
+      // Standalone POs keep a single billing/delivery address string
+      billing_address: f.billing_address || billing,
+      delivery_address: f.delivery_address || shipping,
     }))
   }
 
@@ -166,6 +171,7 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
     const payload = {
       ...form,
       rfq_id: form.rfq_id || null,
+      client_id: selectedClientId || null,
       purchase_total: purchaseTotal,
       items: items.map(item => ({
         // Include id so the PUT route can preserve shipped/dispatch fields
@@ -211,15 +217,13 @@ export default function POForm({ poType, rfq, existing, parsedData }: POFormProp
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>}
 
       {/* ---- Assign to Client ---- */}
-      {!existing && (
-        <div className="card card-body">
-          <label className="form-label">Assign to Company / Client</label>
-          <select className="form-input max-w-sm" value={selectedClientId} onChange={e => applyClient(e.target.value)}>
-            <option value="">— Select a client (optional) —</option>
-            {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.customer_id ? ` (${c.customer_id})` : ''}</option>)}
-          </select>
-        </div>
-      )}
+      <div className="card card-body">
+        <label className="form-label">Assign to Company / Client</label>
+        <select className="form-input max-w-sm" value={selectedClientId} onChange={e => applyClient(e.target.value)}>
+          <option value="">— Select a client (optional) —</option>
+          {clients.map(c => <option key={c.id} value={c.id}>{c.name}{c.customer_id ? ` (${c.customer_id})` : ''}</option>)}
+        </select>
+      </div>
 
       {/* Document Info */}
       <div className="card">

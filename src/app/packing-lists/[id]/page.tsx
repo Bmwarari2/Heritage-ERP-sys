@@ -7,7 +7,7 @@ import { Printer, ArrowLeft, Loader2, Save, Plus, Trash2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
 import { printPdf } from '@/lib/print-pdf'
-import type { PackingList } from '@/types'
+import type { PackingList, Client } from '@/types'
 
 function PLContent() {
   const { id } = useParams<{ id: string }>()
@@ -16,8 +16,10 @@ function PLContent() {
   const isNew = id === 'new'
   const poId = searchParams.get('po_id')
   const batchId = searchParams.get('batch_id')
+  const initialClientId = searchParams.get('client_id') ?? ''
 
   const [pl, setPl] = useState<PackingList | null>(null)
+  const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState(isNew)
@@ -25,7 +27,7 @@ function PLContent() {
   const defaultNotes = 'PLEASE NOTIFY US IMMEDIATELY IF SHIPMENT CONTAINS ERRORS!\nContact: Eric, Tel: +447428777090'
 
   const [form, setForm] = useState({
-    po_id: poId ?? '', batch_id: batchId ?? '',
+    po_id: poId ?? '', batch_id: batchId ?? '', client_id: initialClientId,
     customer_po_number: '', our_order_number: '',
     final_destination: '', shipped_via: '', sales_person: '',
     ship_to_address: '', notes: defaultNotes, status: 'draft' as string,
@@ -37,11 +39,15 @@ function PLContent() {
   }])
 
   useEffect(() => {
+    fetch('/api/clients').then(r => r.json()).then(d => setClients(Array.isArray(d) ? d : [])).catch(() => setClients([]))
+  }, [])
+
+  useEffect(() => {
     if (!isNew) {
       fetch(`/api/packing-lists/${id}`).then(r => r.json()).then(data => {
         setPl(data); setLoading(false)
         setForm({
-          po_id: data.po_id ?? '', batch_id: data.batch_id ?? '',
+          po_id: data.po_id ?? '', batch_id: data.batch_id ?? '', client_id: data.client_id ?? '',
           customer_po_number: data.customer_po_number ?? '', our_order_number: data.our_order_number ?? '',
           final_destination: data.final_destination ?? '', shipped_via: data.shipped_via ?? '',
           sales_person: data.sales_person ?? '', ship_to_address: data.ship_to_address ?? '',
@@ -59,10 +65,12 @@ function PLContent() {
           .filter(Boolean).join('\n')
         setForm(f => ({
           ...f,
+          client_id: po.client_id ?? f.client_id,
           customer_po_number: po.po_number ?? '',
           our_order_number: po.your_reference ?? '',
           shipped_via: po.mode_of_transport ?? '',
           sales_person: po.sales_person ?? '',
+          final_destination: po.ship_to_country ?? f.final_destination,
           ship_to_address: shipTo,
         }))
         const batchItems = (batch.dispatch_batch_items ?? [])
@@ -84,9 +92,19 @@ function PLContent() {
     setBoxes(boxes => boxes.map((box, idx) => idx === i ? { ...box, [key]: value } : box))
   }
 
+  function applyClient(clientId: string) {
+    const c = clients.find(cl => cl.id === clientId)
+    if (!c) { setForm(f => ({ ...f, client_id: '' })); return }
+    setForm(f => ({
+      ...f,
+      client_id: c.id,
+      ship_to_address: c.address ?? f.ship_to_address,
+    }))
+  }
+
   async function handleSave() {
     setSaving(true)
-    const payload = { ...form, items, boxes }
+    const payload = { ...form, client_id: form.client_id || null, items, boxes }
     const url = isNew ? '/api/packing-lists' : `/api/packing-lists/${id}`
     const res = await fetch(url, { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
     const data = await res.json()
@@ -116,9 +134,18 @@ function PLContent() {
               <div><label className="form-label">Shipped Via</label><input className="form-input" value={form.shipped_via} onChange={e => setField('shipped_via', e.target.value)} /></div>
               <div><label className="form-label">Sales Person</label><input className="form-input" value={form.sales_person} onChange={e => setField('sales_person', e.target.value)} /></div>
             </div>
-            <div className="px-6 pb-4">
-              <label className="form-label">Ship To Address</label>
-              <textarea className="form-textarea" rows={3} value={form.ship_to_address} onChange={e => setField('ship_to_address', e.target.value)} />
+            <div className="px-6 pb-4 space-y-3">
+              <div>
+                <label className="form-label">Client</label>
+                <select className="form-input" value={form.client_id} onChange={e => applyClient(e.target.value)}>
+                  <option value="">— Select client —</option>
+                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="form-label">Ship To Address</label>
+                <textarea className="form-textarea" rows={3} value={form.ship_to_address} onChange={e => setField('ship_to_address', e.target.value)} />
+              </div>
             </div>
           </div>
 
