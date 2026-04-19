@@ -5,8 +5,8 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Printer, ArrowLeft, Loader2, Save, Plus, Trash2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
-import DocumentHeader from '@/components/shared/DocumentHeader'
 import StatusBadge from '@/components/shared/StatusBadge'
+import { printPdf } from '@/lib/print-pdf'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import type { CommercialInvoice } from '@/types'
 
@@ -200,59 +200,95 @@ function CIContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
         {ci.po_id && <Link href={`/purchase-orders/${ci.po_id}`} className="btn btn-secondary btn-sm">View PO</Link>}
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
-        <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => printPdf(`/api/commercial-invoices/${ci.id}/pdf`)}><Printer className="w-4 h-4" /> Print</button>
         <a href={`/api/commercial-invoices/${ci.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
           <Printer className="w-4 h-4" /> Download PDF
         </a>
       </div>}>
-      <div className="card card-body w-full print-page">
-        <DocumentHeader title="COMMERCIAL INVOICE" docNumber={ci.invoice_number} docDate={formatDate(ci.invoice_date)}
-          extra={
-            <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-0.5 text-sm text-slate-700">
-              {ci.purchase_order_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">PO No:</span> {ci.purchase_order_number}</p>}
-              {ci.awb_bl_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">AWB/BL:</span> {ci.awb_bl_number}</p>}
-              <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Currency:</span> {ci.currency}</p>
-              {ci.terms_of_sale && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Terms of Sale:</span> {ci.terms_of_sale}</p>}
-              {ci.final_destination && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Final Destination:</span> {ci.final_destination}</p>}
-              {ci.country_of_origin && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Country of Origin:</span> {ci.country_of_origin}</p>}
+      <div className="card card-body w-full print-page doc-print-page">
+        <div className="doc-print-inner">
+          <div className="doc-header">
+            <div className="doc-header-left">
+              <p className="doc-doc-label">Document</p>
+              <h1 className="doc-title">Commercial Invoice</h1>
+              <dl className="doc-ref-box">
+                <dt>Invoice No</dt>
+                <dd className="font-mono">{ci.invoice_number}</dd>
+                <dt>Date</dt>
+                <dd>{formatDate(ci.invoice_date)}</dd>
+                {ci.purchase_order_number && (<><dt>PO No</dt><dd className="font-mono">{ci.purchase_order_number}</dd></>)}
+                {ci.awb_bl_number && (<><dt>AWB/BL</dt><dd className="font-mono">{ci.awb_bl_number}</dd></>)}
+                <dt>Currency</dt>
+                <dd>{ci.currency}</dd>
+                {ci.terms_of_sale && (<><dt>Terms of Sale</dt><dd>{ci.terms_of_sale}</dd></>)}
+                {ci.country_of_origin && (<><dt>Country of Origin</dt><dd>{ci.country_of_origin}</dd></>)}
+                {ci.final_destination && (<><dt>Final Destination</dt><dd>{ci.final_destination}</dd></>)}
+              </dl>
             </div>
-          } />
-        <div className="mb-4 no-print"><StatusBadge status={ci.status} /></div>
-        <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
-          <div>
-            <p className="section-title">Shipper</p>
-            <p className="font-medium">{ci.shipper_name}</p>
-            {ci.shipper_address && <p className="whitespace-pre-line">{ci.shipper_address}</p>}
           </div>
-          <div>
-            <p className="section-title">Consignee</p>
-            <p className="font-medium">{ci.consignee_name}</p>
-            {ci.consignee_address && <p className="whitespace-pre-line">{ci.consignee_address}</p>}
-            {ci.notify_party && <p className="mt-1"><span className="font-medium">Notify Party:</span> {ci.notify_party}</p>}
-            {ci.intermediate_consignee && <p><span className="font-medium">Intermediate Consignee:</span> {ci.intermediate_consignee}</p>}
+
+          <div className="mb-5 no-print"><StatusBadge status={ci.status} /></div>
+
+          <section className="doc-address-grid">
+            <div className="doc-address-cell">
+              <p className="section-title">Shipper</p>
+              <p className="font-medium">{ci.shipper_name}</p>
+              {ci.shipper_address && <p className="whitespace-pre-line">{ci.shipper_address}</p>}
+            </div>
+            <div className="doc-address-cell">
+              <p className="section-title">Consignee</p>
+              <p className="font-medium">{ci.consignee_name}</p>
+              {ci.consignee_address && <p className="whitespace-pre-line">{ci.consignee_address}</p>}
+              {ci.notify_party && <p className="mt-1"><span className="font-medium">Notify Party:</span> {ci.notify_party}</p>}
+              {ci.intermediate_consignee && <p><span className="font-medium">Intermediate Consignee:</span> {ci.intermediate_consignee}</p>}
+            </div>
+          </section>
+
+          <section className="doc-items">
+            <p className="section-title">Items</p>
+            <div className="overflow-x-auto">
+              <table className="data-table text-xs">
+                <thead>
+                  <tr>
+                    <th>Item No</th>
+                    <th>Product Description</th>
+                    <th className="text-right">Qty</th>
+                    <th className="text-right">Unit Price</th>
+                    <th className="text-right">Total Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ci.ci_items?.map(item => (
+                    <tr key={item.id}>
+                      <td className="font-mono">{item.item_number}</td>
+                      <td>{item.product_description}</td>
+                      <td className="text-right">{item.quantity}</td>
+                      <td className="text-right">{ci.currency} {Number(item.unit_price).toFixed(2)}</td>
+                      <td className="text-right font-semibold">{ci.currency} {Number(item.total_value).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="flex justify-end mt-6 mb-4">
+            <div className="w-full sm:w-80 doc-address-cell">
+              <p className="section-title">Summary</p>
+              <div className="flex justify-between font-bold text-base border-t-2 border-slate-300 pt-2 mt-1">
+                <span className="text-slate-900">Total Invoice Amount</span>
+                <span className="text-heritage-900">{formatCurrency(ci.total_amount, ci.currency)}</span>
+              </div>
+            </div>
           </div>
+
+          {ci.notes && (
+            <div className="text-sm mt-4">
+              <p className="section-title">Notes</p>
+              <p className="text-slate-700 whitespace-pre-line leading-relaxed">{ci.notes}</p>
+            </div>
+          )}
         </div>
-        <table className="data-table text-xs mb-4">
-          <thead><tr><th>Item No</th><th>Product Description</th><th className="text-right">Qty</th><th className="text-right">Unit Price</th><th className="text-right">Total Value</th></tr></thead>
-          <tbody>
-            {ci.ci_items?.map(item => (
-              <tr key={item.id}>
-                <td className="font-mono">{item.item_number}</td>
-                <td>{item.product_description}</td>
-                <td className="text-right">{item.quantity}</td>
-                <td className="text-right">{ci.currency} {Number(item.unit_price).toFixed(2)}</td>
-                <td className="text-right font-medium">{ci.currency} {Number(item.total_value).toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex justify-end mb-4">
-          <div className="w-48 flex justify-between font-bold text-base border-t border-gray-200 pt-2">
-            <span>Total Invoice Amount</span>
-            <span className="text-[#1E3A5F]">{formatCurrency(ci.total_amount, ci.currency)}</span>
-          </div>
-        </div>
-        {ci.notes && <div className="text-sm"><p className="section-title">Notes</p><p>{ci.notes}</p></div>}
       </div>
     </PageWrapper>
   )

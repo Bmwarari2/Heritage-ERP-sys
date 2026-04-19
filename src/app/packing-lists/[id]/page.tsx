@@ -5,9 +5,8 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Printer, ArrowLeft, Loader2, Save, Plus, Trash2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
-import DocumentHeader from '@/components/shared/DocumentHeader'
 import StatusBadge from '@/components/shared/StatusBadge'
-import { formatDate } from '@/lib/utils'
+import { printPdf } from '@/lib/print-pdf'
 import type { PackingList } from '@/types'
 
 function PLContent() {
@@ -181,67 +180,88 @@ function PLContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
         {pl.po_id && <Link href={`/purchase-orders/${pl.po_id}`} className="btn btn-secondary btn-sm">View PO</Link>}
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
-        <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => printPdf(`/api/packing-lists/${pl.id}/pdf`)}><Printer className="w-4 h-4" /> Print</button>
         <a href={`/api/packing-lists/${pl.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
           <Printer className="w-4 h-4" /> Download PDF
         </a>
       </div>}>
-      <div className="card card-body w-full print-page">
-        <DocumentHeader title="PACKING LIST"
-          extra={
-            <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-0.5 text-sm text-slate-700">
-              {pl.customer_po_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Customer PO:</span> {pl.customer_po_number}</p>}
-              {pl.our_order_number && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Our Order No:</span> {pl.our_order_number}</p>}
-              {pl.final_destination && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Destination:</span> {pl.final_destination}</p>}
-              {pl.shipped_via && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Shipped Via:</span> {pl.shipped_via}</p>}
-              {pl.sales_person && <p><span className="font-semibold text-slate-500 text-[11px] uppercase tracking-wider">Sales Person:</span> {pl.sales_person}</p>}
+      <div className="card card-body w-full print-page doc-print-page">
+        <div className="doc-print-inner">
+          <div className="doc-header">
+            <div className="doc-header-left">
+              <p className="doc-doc-label">Document</p>
+              <h1 className="doc-title">Packing List</h1>
+              <dl className="doc-ref-box">
+                {pl.customer_po_number && (<><dt>Customer PO</dt><dd className="font-mono">{pl.customer_po_number}</dd></>)}
+                {pl.our_order_number && (<><dt>Our Order No</dt><dd className="font-mono">{pl.our_order_number}</dd></>)}
+                {pl.final_destination && (<><dt>Destination</dt><dd>{pl.final_destination}</dd></>)}
+                {pl.shipped_via && (<><dt>Shipped Via</dt><dd>{pl.shipped_via}</dd></>)}
+                {pl.sales_person && (<><dt>Sales Person</dt><dd>{pl.sales_person}</dd></>)}
+              </dl>
             </div>
-          } />
-
-        <div className="mb-4 no-print"><StatusBadge status={pl.status} /></div>
-
-        {pl.ship_to_address && (
-          <div className="mb-6 text-sm">
-            <p className="section-title">Ship To</p>
-            <p className="whitespace-pre-line">{pl.ship_to_address}</p>
           </div>
-        )}
 
-        {/* Items — no Item No column, qty centered */}
-        <div className="mb-6">
-          <p className="section-title">Items</p>
-          <table className="data-table text-xs">
-            <thead><tr><th className="text-center w-28">Quantity</th><th>Description</th></tr></thead>
-            <tbody>
-              {pl.packing_list_items?.map(item => (
-                <tr key={item.id}>
-                  <td className="text-center">{item.quantity}</td>
-                  <td>{item.description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+          <div className="mb-5 no-print"><StatusBadge status={pl.status} /></div>
 
-        {/* Box Details */}
-        {pl.packing_list_boxes && pl.packing_list_boxes.length > 0 && (
-          <div className="mb-4">
-            <p className="section-title">Box Details</p>
-            <table className="data-table text-xs">
-              <thead><tr><th>Box No</th><th>Type</th><th>Dimensions (L×W×H cm)</th><th className="text-right">Gross Weight (kg)</th></tr></thead>
-              <tbody>
-                {pl.packing_list_boxes.map(box => (
-                  <tr key={box.id}>
-                    <td className="font-mono">{box.box_number}</td>
-                    <td>{box.box_type}</td>
-                    <td>{box.dimension_l} × {box.dimension_w} × {box.dimension_h}</td>
-                    <td className="text-right">{box.gross_weight}</td>
+          {pl.ship_to_address && (
+            <section className="doc-address-grid">
+              <div className="doc-address-cell">
+                <p className="section-title">Ship To</p>
+                <p className="whitespace-pre-line">{pl.ship_to_address}</p>
+              </div>
+            </section>
+          )}
+
+          <section className="doc-items">
+            <p className="section-title">Items</p>
+            <div className="overflow-x-auto">
+              <table className="data-table text-xs">
+                <thead>
+                  <tr>
+                    <th className="text-center w-28">Quantity</th>
+                    <th>Description</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {pl.packing_list_items?.map(item => (
+                    <tr key={item.id}>
+                      <td className="text-center">{item.quantity}</td>
+                      <td>{item.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {pl.packing_list_boxes && pl.packing_list_boxes.length > 0 && (
+            <section className="doc-items">
+              <p className="section-title">Box Details</p>
+              <div className="overflow-x-auto">
+                <table className="data-table text-xs">
+                  <thead>
+                    <tr>
+                      <th>Box No</th>
+                      <th>Type</th>
+                      <th>Dimensions (L×W×H cm)</th>
+                      <th className="text-right">Gross Weight (kg)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {pl.packing_list_boxes.map(box => (
+                      <tr key={box.id}>
+                        <td className="font-mono">{box.box_number}</td>
+                        <td>{box.box_type}</td>
+                        <td>{box.dimension_l} × {box.dimension_w} × {box.dimension_h}</td>
+                        <td className="text-right">{box.gross_weight}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+        </div>
       </div>
     </PageWrapper>
   )

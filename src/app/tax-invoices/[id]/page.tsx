@@ -5,8 +5,8 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Printer, ArrowLeft, Loader2, Save, Plus, Trash2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
-import DocumentHeader from '@/components/shared/DocumentHeader'
 import StatusBadge from '@/components/shared/StatusBadge'
+import { printPdf } from '@/lib/print-pdf'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import type { TaxInvoice } from '@/types'
 
@@ -300,73 +300,122 @@ function TIContent() {
         <button className="btn btn-secondary btn-sm" onClick={() => router.back()}><ArrowLeft className="w-4 h-4" /></button>
         {ti.po_id && <Link href={`/purchase-orders/${ti.po_id}`} className="btn btn-secondary btn-sm">View PO</Link>}
         <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>Edit</button>
-        <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+        <button className="btn btn-secondary btn-sm" onClick={() => printPdf(`/api/tax-invoices/${ti.id}/pdf`)}><Printer className="w-4 h-4" /> Print</button>
         <a href={`/api/tax-invoices/${ti.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
           <Printer className="w-4 h-4" /> Download PDF
         </a>
       </div>}>
-      <div className="card card-body w-full print-page">
-        <DocumentHeader title="TAX INVOICE" docNumber={ti.tax_invoice_number} docDate={formatDate(ti.invoice_date)} />
-        <div className="mb-4 no-print"><StatusBadge status={ti.status} /></div>
-        {/* Bill To & Payment */}
-        <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
-          <div>
-            <p className="section-title">Bill To</p>
-            <p className="font-medium">{ti.customer_name}</p>
-            {ti.customer_id && <p><span className="font-medium">Customer ID:</span> {ti.customer_id}</p>}
-            {ti.customer_address && <p className="whitespace-pre-line">{ti.customer_address}</p>}
-            {ti.customer_phone && <p>{ti.customer_phone}</p>}
-          </div>
-          <div>
-            <p className="section-title">Payment Due</p>
-            {ti.payment_due_date && <p><span className="font-medium">Due:</span> {formatDate(ti.payment_due_date)}</p>}
-            {ti.sales_person && <p><span className="font-medium">Sales Person:</span> {ti.sales_person}</p>}
-            {ti.payment_terms && <p><span className="font-medium">Terms:</span> {ti.payment_terms}</p>}
-            <p className="section-title mt-3">Order Details</p>
-            {ti.purchase_order_number && <p><span className="font-medium">PO No:</span> {ti.purchase_order_number}</p>}
-            {ti.order_date && <p><span className="font-medium">Order Date:</span> {formatDate(ti.order_date)}</p>}
-            {ti.shipping_terms && <p><span className="font-medium">Shipping Terms:</span> {ti.shipping_terms}</p>}
-          </div>
-        </div>
-        <table className="data-table text-xs mb-4">
-          <thead><tr><th>Item No</th><th>Item Description</th><th className="text-right">Qty</th><th className="text-right">Unit Price</th><th className="text-right">Line Total</th></tr></thead>
-          <tbody>
-            {ti.ti_items?.map(item => (
-              <tr key={item.id}>
-                <td className="font-mono">{item.item_number}</td>
-                <td>{item.item_description}</td>
-                <td className="text-right">{item.quantity}</td>
-                <td className="text-right">{ti.currency} {Number(item.unit_price).toFixed(2)}</td>
-                <td className="text-right font-medium">{ti.currency} {Number(item.line_total).toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex justify-between mb-4">
-          <div className="text-xs text-gray-500">
-            {ti.vat_reg_number && <p><span className="font-medium">VAT Reg No:</span> {ti.vat_reg_number}</p>}
-            {ti.company_reg_number && <p><span className="font-medium">Co Reg No:</span> {ti.company_reg_number}</p>}
-          </div>
-          <div className="w-64 space-y-1 text-sm">
-            <div className="flex justify-between"><span>Sub Total</span><span>{ti.currency} {tiSubtotal.toFixed(2)}</span></div>
-            {tiTax > 0 && <div className="flex justify-between"><span>Sales Tax ({ti.sales_tax_rate}%)</span><span>{ti.currency} {tiTax.toFixed(2)}</span></div>}
-            <div className="flex justify-between font-bold border-t border-gray-200 pt-2"><span>Total</span><span className="text-[#1E3A5F]">{formatCurrency(tiTotal, ti.currency)}</span></div>
-          </div>
-        </div>
-        {/* Bank Details */}
-        {ti.bank_name && (
-          <div className="text-sm border-t border-gray-100 pt-4">
-            <p className="section-title">Payment Details</p>
-            <div className="grid grid-cols-3 gap-4">
-              {ti.bank_name && <p><span className="font-medium">Bank:</span> {ti.bank_name}</p>}
-              {ti.bank_account_name && <p><span className="font-medium">Account:</span> {ti.bank_account_name}</p>}
-              {ti.bank_account_number && <p><span className="font-medium">Account No:</span> {ti.bank_account_number}</p>}
-              {ti.bank_sort_code && <p><span className="font-medium">Sort Code:</span> {ti.bank_sort_code}</p>}
-              {ti.bank_iban && <p><span className="font-medium">IBAN:</span> {ti.bank_iban}</p>}
-              {ti.bank_swift && <p><span className="font-medium">SWIFT:</span> {ti.bank_swift}</p>}
+      <div className="card card-body w-full print-page doc-print-page">
+        <div className="doc-print-inner">
+          <div className="doc-header">
+            <div className="doc-header-left">
+              <p className="doc-doc-label">Document</p>
+              <h1 className="doc-title">Tax Invoice</h1>
+              <dl className="doc-ref-box">
+                <dt>Invoice No</dt>
+                <dd className="font-mono">{ti.tax_invoice_number}</dd>
+                <dt>Date</dt>
+                <dd>{formatDate(ti.invoice_date)}</dd>
+                {ti.payment_due_date && (<><dt>Payment Due</dt><dd>{formatDate(ti.payment_due_date)}</dd></>)}
+                {ti.payment_terms && (<><dt>Payment Terms</dt><dd>{ti.payment_terms}</dd></>)}
+                {ti.purchase_order_number && (<><dt>PO No</dt><dd className="font-mono">{ti.purchase_order_number}</dd></>)}
+                {ti.order_date && (<><dt>Order Date</dt><dd>{formatDate(ti.order_date)}</dd></>)}
+                {ti.shipping_terms && (<><dt>Shipping Terms</dt><dd>{ti.shipping_terms}</dd></>)}
+                <dt>Currency</dt>
+                <dd>{ti.currency}</dd>
+              </dl>
             </div>
           </div>
-        )}
+
+          <div className="mb-5 no-print"><StatusBadge status={ti.status} /></div>
+
+          <section className="doc-address-grid">
+            <div className="doc-address-cell">
+              <p className="section-title">Bill To</p>
+              <p className="font-medium">{ti.customer_name}</p>
+              {ti.customer_id && <p><span className="font-medium">Customer ID:</span> {ti.customer_id}</p>}
+              {ti.customer_address && <p className="whitespace-pre-line">{ti.customer_address}</p>}
+              {ti.customer_phone && <p>{ti.customer_phone}</p>}
+            </div>
+            <div className="doc-address-cell">
+              <p className="section-title">Sales &amp; Registration</p>
+              {ti.sales_person && <p><span className="font-medium">Sales Person:</span> {ti.sales_person}</p>}
+              {ti.vat_reg_number && <p><span className="font-medium">VAT Reg No:</span> {ti.vat_reg_number}</p>}
+              {ti.company_reg_number && <p><span className="font-medium">Co Reg No:</span> {ti.company_reg_number}</p>}
+            </div>
+          </section>
+
+          <section className="doc-items">
+            <p className="section-title">Items</p>
+            <div className="overflow-x-auto">
+              <table className="data-table text-xs">
+                <thead>
+                  <tr>
+                    <th>Item No</th>
+                    <th>Item Description</th>
+                    <th className="text-right">Qty</th>
+                    <th className="text-right">Unit Price</th>
+                    <th className="text-right">Line Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ti.ti_items?.map(item => (
+                    <tr key={item.id}>
+                      <td className="font-mono">{item.item_number}</td>
+                      <td>{item.item_description}</td>
+                      <td className="text-right">{item.quantity}</td>
+                      <td className="text-right">{ti.currency} {Number(item.unit_price).toFixed(2)}</td>
+                      <td className="text-right font-semibold">{ti.currency} {Number(item.line_total).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="flex justify-end mt-6 mb-4">
+            <div className="w-full sm:w-80 doc-address-cell">
+              <p className="section-title">Summary</p>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Sub Total</span>
+                  <span className="font-medium text-slate-900">{ti.currency} {tiSubtotal.toFixed(2)}</span>
+                </div>
+                {tiTax > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Sales Tax ({ti.sales_tax_rate}%)</span>
+                    <span className="font-medium text-slate-900">{ti.currency} {tiTax.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-base border-t-2 border-slate-300 pt-2 mt-2">
+                  <span className="text-slate-900">Total</span>
+                  <span className="text-heritage-900">{formatCurrency(tiTotal, ti.currency)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {ti.bank_name && (
+            <section className="doc-address-cell mt-4">
+              <p className="section-title">Payment Details</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-1 text-sm">
+                {ti.bank_name && <p><span className="font-medium">Bank:</span> {ti.bank_name}</p>}
+                {ti.bank_account_name && <p><span className="font-medium">Account:</span> {ti.bank_account_name}</p>}
+                {ti.bank_account_number && <p><span className="font-medium">Account No:</span> {ti.bank_account_number}</p>}
+                {ti.bank_sort_code && <p><span className="font-medium">Sort Code:</span> {ti.bank_sort_code}</p>}
+                {ti.bank_iban && <p><span className="font-medium">IBAN:</span> {ti.bank_iban}</p>}
+                {ti.bank_swift && <p><span className="font-medium">SWIFT:</span> {ti.bank_swift}</p>}
+              </div>
+            </section>
+          )}
+
+          {ti.notes && (
+            <div className="text-sm mt-4">
+              <p className="section-title">Notes</p>
+              <p className="text-slate-700 whitespace-pre-line leading-relaxed">{ti.notes}</p>
+            </div>
+          )}
+        </div>
       </div>
     </PageWrapper>
   )

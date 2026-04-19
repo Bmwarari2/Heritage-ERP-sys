@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { Edit2, Printer, ArrowLeft, Loader2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
-import DocumentHeader from '@/components/shared/DocumentHeader'
 import ProformaForm from '@/components/proforma/ProformaForm'
+import { printPdf } from '@/lib/print-pdf'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import type { ProformaInvoice } from '@/types'
 
@@ -49,145 +49,109 @@ export default function ProformaDetailPage() {
             <Link href={`/rfq/${pi.rfq_id}`} className="btn btn-secondary btn-sm">View RFQ</Link>
           )}
           <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}><Edit2 className="w-4 h-4" /> Edit</button>
-          <button className="btn btn-secondary btn-sm" onClick={() => window.print()}><Printer className="w-4 h-4" /> Print</button>
+          <button className="btn btn-secondary btn-sm" onClick={() => printPdf(`/api/proforma/${pi.id}/pdf`)}><Printer className="w-4 h-4" /> Print</button>
           <a href={`/api/proforma/${pi.id}/pdf`} className="btn btn-primary btn-sm" target="_blank" rel="noopener">
             <Printer className="w-4 h-4" /> Download PDF
           </a>
         </div>
       }
     >
-      <div className="card card-body w-full print-page">
-        <DocumentHeader
-          title="Proforma Invoice"
-          subtitle="Trade &amp; Export Documentation"
-          docNumber={pi.proforma_number}
-          docDate={formatDate(pi.invoice_date)}
-          extra={
-            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
-              {pi.valid_until_date && (
-                <>
-                  <span className="font-bold text-slate-500 uppercase tracking-wider">Valid Until</span>
-                  <span className="text-slate-800 font-medium">{formatDate(pi.valid_until_date)}</span>
-                </>
-              )}
-              {refRfqNumber && (
-                <>
-                  <span className="font-bold text-slate-500 uppercase tracking-wider">Ref RFQ</span>
-                  <span className="font-mono font-semibold text-slate-800">{refRfqNumber}</span>
-                </>
-              )}
-              {pi.currency && (
-                <>
-                  <span className="font-bold text-slate-500 uppercase tracking-wider">Currency</span>
-                  <span className="font-semibold text-slate-800">{pi.currency}</span>
-                </>
-              )}
+      <div className="card card-body w-full print-page doc-print-page">
+        <div className="doc-print-inner">
+          <div className="doc-header">
+            <div className="doc-header-left">
+              <p className="doc-doc-label">Document</p>
+              <h1 className="doc-title">Proforma Invoice</h1>
+              <dl className="doc-ref-box">
+                <dt>Doc Number</dt>
+                <dd className="font-mono">{pi.proforma_number}</dd>
+                <dt>Date</dt>
+                <dd>{formatDate(pi.invoice_date)}</dd>
+                {pi.valid_until_date && (<><dt>Valid Until</dt><dd>{formatDate(pi.valid_until_date)}</dd></>)}
+                {refRfqNumber && (<><dt>Ref RFQ</dt><dd className="font-mono">{refRfqNumber}</dd></>)}
+                {pi.currency && (<><dt>Currency</dt><dd>{pi.currency}</dd></>)}
+              </dl>
             </div>
-          }
-        />
-
-        {/* Status badge — screen only */}
-        <div className="mb-6 no-print"><StatusBadge status={pi.status} /></div>
-
-        {/* Bill-to / Shipping — structural print boxes */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8 text-sm">
-          <div className="print-box">
-            <p className="print-box-title">Bill To</p>
-            <p className="font-bold text-slate-900">{pi.client_company}</p>
-            {pi.client_department && <p className="text-slate-700">{pi.client_department}</p>}
-            {pi.client_address && <p className="whitespace-pre-line text-slate-700">{pi.client_address}</p>}
-            {pi.client_country && <p className="text-slate-700">{pi.client_country}</p>}
-            {pi.client_phone && (
-              <p className="text-slate-700 mt-1"><span className="font-semibold">Phone:</span> {pi.client_phone}</p>
-            )}
           </div>
 
-          <div className="print-box">
-            <p className="print-box-title">Shipping &amp; Terms</p>
-            <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-slate-700">
-              {pi.airway_bill && (
-                <>
-                  <dt className="font-semibold text-slate-600">Airway Bill</dt>
-                  <dd className="font-mono">{pi.airway_bill}</dd>
-                </>
-              )}
-              {pi.incoterm && (
-                <>
-                  <dt className="font-semibold text-slate-600">Incoterm</dt>
-                  <dd>{pi.incoterm}</dd>
-                </>
-              )}
-              {pi.incoterm_country && (
-                <>
-                  <dt className="font-semibold text-slate-600">Incoterm Country</dt>
-                  <dd>{pi.incoterm_country}</dd>
-                </>
-              )}
-              <dt className="font-semibold text-slate-600">Currency</dt>
-              <dd className="font-semibold">{pi.currency}</dd>
-            </dl>
-          </div>
-        </div>
+          <div className="mb-5 no-print"><StatusBadge status={pi.status} /></div>
 
-        {/* Line items */}
-        <div className="mb-6">
-          <p className="section-title">Items</p>
-          <div className="overflow-x-auto">
-            <table className="data-table text-xs">
-              <thead>
-                <tr>
-                  <th>Item No</th>
-                  <th>Description of Goods</th>
-                  <th className="text-right">Qty</th>
-                  <th className="text-right">Unit Price</th>
-                  <th className="text-right">Total Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map(item => (
-                  <tr key={item.id}>
-                    <td className="font-mono">{item.item_number}</td>
-                    <td>{item.description}</td>
-                    <td className="text-right">{item.quantity}</td>
-                    <td className="text-right">{pi.currency} {Number(item.unit_price).toFixed(2)}</td>
-                    <td className="text-right font-semibold">{pi.currency} {Number(item.total_cost).toFixed(2)}</td>
+          <section className="doc-address-grid">
+            <div className="doc-address-cell">
+              <p className="section-title">Bill To</p>
+              <p className="font-medium">{pi.client_company}</p>
+              {pi.client_department && <p>{pi.client_department}</p>}
+              {pi.client_address && <p className="whitespace-pre-line">{pi.client_address}</p>}
+              {pi.client_country && <p>{pi.client_country}</p>}
+              {pi.client_phone && <p><span className="font-medium">Phone:</span> {pi.client_phone}</p>}
+            </div>
+
+            <div className="doc-address-cell">
+              <p className="section-title">Shipping &amp; Terms</p>
+              {pi.airway_bill && <p><span className="font-medium">Airway Bill:</span> <span className="font-mono">{pi.airway_bill}</span></p>}
+              {pi.incoterm && <p><span className="font-medium">Incoterm:</span> {pi.incoterm}</p>}
+              {pi.incoterm_country && <p><span className="font-medium">Incoterm Country:</span> {pi.incoterm_country}</p>}
+              <p><span className="font-medium">Currency:</span> {pi.currency}</p>
+            </div>
+          </section>
+
+          <section className="doc-items">
+            <p className="section-title">Items</p>
+            <div className="overflow-x-auto">
+              <table className="data-table text-xs">
+                <thead>
+                  <tr>
+                    <th>Item No</th>
+                    <th>Description of Goods</th>
+                    <th className="text-right">Qty</th>
+                    <th className="text-right">Unit Price</th>
+                    <th className="text-right">Total Cost</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                </thead>
+                <tbody>
+                  {items.map(item => (
+                    <tr key={item.id}>
+                      <td className="font-mono">{item.item_number}</td>
+                      <td>{item.description}</td>
+                      <td className="text-right">{item.quantity}</td>
+                      <td className="text-right">{pi.currency} {Number(item.unit_price).toFixed(2)}</td>
+                      <td className="text-right font-semibold">{pi.currency} {Number(item.total_cost).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
 
-        {/* Totals — structured box */}
-        <div className="flex justify-end mb-8">
-          <div className="w-full sm:w-80 print-box">
-            <p className="print-box-title">Summary</p>
-            <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-600">Subtotal</span>
-                <span className="font-medium text-slate-900">{pi.currency} {Number(pi.subtotal).toFixed(2)}</span>
-              </div>
-              {pi.tax_rate > 0 && (
+          <div className="flex justify-end mt-6 mb-4">
+            <div className="w-full sm:w-80 doc-address-cell">
+              <p className="section-title">Summary</p>
+              <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-600">Tax ({pi.tax_rate}%)</span>
-                  <span className="font-medium text-slate-900">{pi.currency} {Number(pi.tax_amount).toFixed(2)}</span>
+                  <span className="text-slate-600">Subtotal</span>
+                  <span className="font-medium text-slate-900">{pi.currency} {Number(pi.subtotal).toFixed(2)}</span>
                 </div>
-              )}
-              <div className="flex justify-between font-bold text-base border-t-2 border-slate-300 pt-2 mt-2">
-                <span className="text-slate-900">Total</span>
-                <span className="text-heritage-900">{formatCurrency(pi.total_amount, pi.currency)}</span>
+                {pi.tax_rate > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Tax ({pi.tax_rate}%)</span>
+                    <span className="font-medium text-slate-900">{pi.currency} {Number(pi.tax_amount).toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-base border-t-2 border-slate-300 pt-2 mt-2">
+                  <span className="text-slate-900">Total</span>
+                  <span className="text-heritage-900">{formatCurrency(pi.total_amount, pi.currency)}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Notes */}
-        {pi.notes && (
-          <div className="text-sm">
-            <p className="section-title">Notes</p>
-            <p className="text-slate-700 whitespace-pre-line leading-relaxed">{pi.notes}</p>
-          </div>
-        )}
+          {pi.notes && (
+            <div className="text-sm mt-4">
+              <p className="section-title">Notes</p>
+              <p className="text-slate-700 whitespace-pre-line leading-relaxed">{pi.notes}</p>
+            </div>
+          )}
+        </div>
       </div>
     </PageWrapper>
   )
