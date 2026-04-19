@@ -225,8 +225,8 @@
   position: relative;
   background-image: url('/logo-view.svg');
   background-repeat: no-repeat;
-  background-position: top left;
-  background-size: auto;
+  background-position: top right;
+  background-size: 635px 385px;
   background-color: #FFFFFF;
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
