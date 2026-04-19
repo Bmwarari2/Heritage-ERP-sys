@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Eye } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
@@ -9,6 +10,7 @@ import { formatDate } from '@/lib/utils'
 import type { PackingList } from '@/types'
 
 export default function PackingListPage() {
+  const router = useRouter()
   const [lists, setLists] = useState<PackingList[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,7 +33,14 @@ export default function PackingListPage() {
             <thead><tr><th>PO Number</th><th>Our Order No</th><th>Destination</th><th>Shipped Via</th><th>Sales Person</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
             <tbody>
               {lists.map(pl => (
-                <tr key={pl.id}>
+                <tr
+                  key={pl.id}
+                  className="clickable-row"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/packing-lists/${pl.id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter') router.push(`/packing-lists/${pl.id}`) }}
+                >
                   <td className="font-mono">{pl.customer_po_number ?? '—'}</td>
                   <td className="font-mono">{pl.our_order_number ?? '—'}</td>
                   <td>{pl.final_destination ?? '—'}</td>
@@ -39,7 +48,7 @@ export default function PackingListPage() {
                   <td>{pl.sales_person ?? '—'}</td>
                   <td><StatusBadge status={pl.status} /></td>
                   <td>{formatDate(pl.created_at)}</td>
-                  <td><Link href={`/packing-lists/${pl.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link></td>
+                  <td onClick={e => e.stopPropagation()}><Link href={`/packing-lists/${pl.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link></td>
                 </tr>
               ))}
             </tbody>

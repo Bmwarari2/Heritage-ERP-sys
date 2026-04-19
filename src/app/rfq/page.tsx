@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Plus, Search, Upload, Eye, Trash2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
@@ -9,6 +10,7 @@ import { formatDate } from '@/lib/utils'
 import type { RFQ } from '@/types'
 
 export default function RFQListPage() {
+  const router = useRouter()
   const [rfqs, setRfqs] = useState<RFQ[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -82,7 +84,14 @@ export default function RFQListPage() {
             </thead>
             <tbody>
               {rfqs.map(rfq => (
-                <tr key={rfq.id}>
+                <tr
+                  key={rfq.id}
+                  className="clickable-row"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/rfq/${rfq.id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter') router.push(`/rfq/${rfq.id}`) }}
+                >
                   <td className="font-mono font-medium text-[#1E3A5F]">{rfq.rfq_number}</td>
                   <td>{rfq.buyer_company || '—'}</td>
                   <td className="text-gray-500">{rfq.your_reference || '—'}</td>
@@ -90,7 +99,7 @@ export default function RFQListPage() {
                   <td>{formatDate(rfq.quotation_deadline)}</td>
                   <td className="text-center">{rfq.rfq_items?.length ?? 0}</td>
                   <td><StatusBadge status={rfq.status} /></td>
-                  <td>
+                  <td onClick={e => e.stopPropagation()}>
                     <div className="flex gap-2">
                       <Link href={`/rfq/${rfq.id}`} className="btn btn-secondary btn-sm">
                         <Eye className="w-3.5 h-3.5" />

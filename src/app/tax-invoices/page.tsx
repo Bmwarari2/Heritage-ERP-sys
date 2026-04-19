@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Eye } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
@@ -9,6 +10,7 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import type { TaxInvoice } from '@/types'
 
 export default function TaxInvoiceListPage() {
+  const router = useRouter()
   const [invoices, setInvoices] = useState<TaxInvoice[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,7 +33,14 @@ export default function TaxInvoiceListPage() {
             <thead><tr><th>Tax Invoice No</th><th>PO Number</th><th>Customer</th><th>Date</th><th>Due Date</th><th className="text-right">Total</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {invoices.map(ti => (
-                <tr key={ti.id}>
+                <tr
+                  key={ti.id}
+                  className="clickable-row"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/tax-invoices/${ti.id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter') router.push(`/tax-invoices/${ti.id}`) }}
+                >
                   <td className="font-mono font-medium text-[#1E3A5F]">{ti.tax_invoice_number}</td>
                   <td className="font-mono text-sm">{ti.purchase_order_number ?? '—'}</td>
                   <td>{ti.customer_name ?? '—'}</td>
@@ -39,7 +48,7 @@ export default function TaxInvoiceListPage() {
                   <td>{formatDate(ti.payment_due_date)}</td>
                   <td className="text-right font-medium">{formatCurrency(ti.total_amount, ti.currency)}</td>
                   <td><StatusBadge status={ti.status} /></td>
-                  <td><Link href={`/tax-invoices/${ti.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link></td>
+                  <td onClick={e => e.stopPropagation()}><Link href={`/tax-invoices/${ti.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link></td>
                 </tr>
               ))}
             </tbody>

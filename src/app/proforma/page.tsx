@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Plus, Eye, Trash2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
@@ -9,6 +10,7 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import type { ProformaInvoice } from '@/types'
 
 export default function ProformaListPage() {
+  const router = useRouter()
   const [proformas, setProformas] = useState<ProformaInvoice[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -54,7 +56,14 @@ export default function ProformaListPage() {
             </thead>
             <tbody>
               {proformas.map(pi => (
-                <tr key={pi.id}>
+                <tr
+                  key={pi.id}
+                  className="clickable-row"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/proforma/${pi.id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter') router.push(`/proforma/${pi.id}`) }}
+                >
                   <td className="font-mono font-medium text-[#1E3A5F]">{pi.proforma_number}</td>
                   <td className="text-gray-500 text-xs">{(pi.rfqs as { rfq_number?: string } | undefined)?.rfq_number ?? '—'}</td>
                   <td>{pi.client_company ?? '—'}</td>
@@ -63,7 +72,7 @@ export default function ProformaListPage() {
                   <td>{pi.currency}</td>
                   <td className="text-right font-medium">{formatCurrency(pi.total_amount, pi.currency)}</td>
                   <td><StatusBadge status={pi.status} /></td>
-                  <td>
+                  <td onClick={e => e.stopPropagation()}>
                     <div className="flex gap-2">
                       <Link href={`/proforma/${pi.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link>
                       <button onClick={() => del(pi.id)} className="btn btn-danger btn-sm"><Trash2 className="w-3.5 h-3.5" /></button>

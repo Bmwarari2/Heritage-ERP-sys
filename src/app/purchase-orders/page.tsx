@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Plus, Upload, Eye, Trash2 } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
@@ -9,6 +10,7 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import type { PurchaseOrder } from '@/types'
 
 export default function POListPage() {
+  const router = useRouter()
   const [pos, setPos] = useState<PurchaseOrder[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -60,7 +62,14 @@ export default function POListPage() {
             </thead>
             <tbody>
               {pos.map(po => (
-                <tr key={po.id}>
+                <tr
+                  key={po.id}
+                  className="clickable-row"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/purchase-orders/${po.id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter') router.push(`/purchase-orders/${po.id}`) }}
+                >
                   <td className="font-mono font-medium text-[#1E3A5F]">{po.po_number}</td>
                   <td>
                     <span className={`badge text-xs ${po.po_type === 'standalone' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>
@@ -73,7 +82,7 @@ export default function POListPage() {
                   <td>{po.currency}</td>
                   <td className="text-right font-medium">{formatCurrency(po.total_amount, po.currency)}</td>
                   <td><StatusBadge status={po.status} /></td>
-                  <td>
+                  <td onClick={e => e.stopPropagation()}>
                     <div className="flex gap-2">
                       <Link href={`/purchase-orders/${po.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link>
                       <button onClick={() => del(po.id)} className="btn btn-danger btn-sm"><Trash2 className="w-3.5 h-3.5" /></button>

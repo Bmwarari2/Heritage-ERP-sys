@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Eye } from 'lucide-react'
 import PageWrapper from '@/components/shared/PageWrapper'
 import StatusBadge from '@/components/shared/StatusBadge'
@@ -9,6 +10,7 @@ import { formatDate, formatCurrency } from '@/lib/utils'
 import type { CommercialInvoice } from '@/types'
 
 export default function CommercialInvoiceListPage() {
+  const router = useRouter()
   const [invoices, setInvoices] = useState<CommercialInvoice[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,7 +33,14 @@ export default function CommercialInvoiceListPage() {
             <thead><tr><th>Invoice No</th><th>PO Number</th><th>Date</th><th>Consignee</th><th>Currency</th><th className="text-right">Total</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {invoices.map(ci => (
-                <tr key={ci.id}>
+                <tr
+                  key={ci.id}
+                  className="clickable-row"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/commercial-invoices/${ci.id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter') router.push(`/commercial-invoices/${ci.id}`) }}
+                >
                   <td className="font-mono font-medium text-[#1E3A5F]">{ci.invoice_number}</td>
                   <td className="font-mono text-sm">{ci.purchase_order_number ?? '—'}</td>
                   <td>{formatDate(ci.invoice_date)}</td>
@@ -39,7 +48,7 @@ export default function CommercialInvoiceListPage() {
                   <td>{ci.currency}</td>
                   <td className="text-right font-medium">{formatCurrency(ci.total_amount, ci.currency)}</td>
                   <td><StatusBadge status={ci.status} /></td>
-                  <td><Link href={`/commercial-invoices/${ci.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link></td>
+                  <td onClick={e => e.stopPropagation()}><Link href={`/commercial-invoices/${ci.id}`} className="btn btn-secondary btn-sm"><Eye className="w-3.5 h-3.5" /></Link></td>
                 </tr>
               ))}
             </tbody>
